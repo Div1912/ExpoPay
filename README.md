@@ -2,7 +2,8 @@
 
 A next-generation cross-border payment platform built on the Stellar blockchain. EXPO enables instant, low-cost international payments with Universal IDs, smart escrow contracts, and seamless fiat-to-crypto conversion.
 
-![EXPO Banner](https://via.placeholder.com/1200x400/0a0a0a/C694F9?text=EXPO+Global+Payment+Router)
+![EXPO Banner]<img width="379" height="101" alt="image" src="https://github.com/user-attachments/assets/101d4866-070b-410b-a6ca-fdbce03a7cc2" />
+
 
 ## Overview
 
@@ -41,7 +42,7 @@ EXPO is a full-stack Web3 payment application that combines:
 
 ## App screnshots
 
-Landing Page
+Dashboard
 <img width="242" height="486" alt="Screenshot 2026-01-25 072624" src="https://github.com/user-attachments/assets/367f01ff-e920-491f-8d78-023a14187ce5" />
 
 
