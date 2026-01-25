@@ -56,8 +56,12 @@ Dashboard
 
 <img width="610" height="901" alt="Screenshot 2026-01-25 081541" src="https://github.com/user-attachments/assets/f2e427a8-8c75-4761-9dc9-191b6bf0fef2" />
 
-*Transaction History*
 <img width="708" height="743" alt="Screenshot 2026-01-25 112310" src="https://github.com/user-attachments/assets/557ed12f-7777-464f-9c98-13ec884b8fdb" />
+*Transaction History*
+
+*Verify Transaction on Stellar Explorer*
+<img width="1376" height="845" alt="image" src="https://github.com/user-attachments/assets/92d14866-38c6-4fa0-92a8-57f3886e814d" />
+
 
 ## Tech Stack
 
