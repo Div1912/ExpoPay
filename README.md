@@ -23,12 +23,14 @@ EXPO is a full-stack Web3 payment application that combines:
 - **Transaction History** - Complete audit trail with Stellar Explorer links
 
 ### Escrow Smart Contracts
+
 - **On-Chain Escrow** - Funds locked in Soroban smart contracts
 - **Milestone-Based Release** - Freelancer marks delivered, client releases funds
 - **Dispute Resolution** - Built-in dispute and refund mechanisms
 - **Deadline Enforcement** - Auto-refund on expiry
 
 ### Merchant Payments (India)
+
 - **UPI Integration** - Pay any Indian UPI QR code
 - **Crypto-to-INR** - Your XLM/USDC converted to INR instantly
 - **RBI LRS Compliant** - Follows Liberalised Remittance Scheme guidelines
@@ -71,11 +73,11 @@ Dashboard
 ### Backend
 - **Next.js API Routes** - Serverless functions
 - **Supabase** - PostgreSQL database + Auth + Realtime
-- **Stellar SDK** - Blockchain interactions
+- **Stellar SDK** - Blockchain interactions for settling Merchant and P2P payments
 
 ### Blockchain
 - **Stellar Network** - Fast, low-cost transactions (~$0.00001 per tx)
-- **Soroban Smart Contracts** - Rust-based escrow logic
+- **Soroban Smart Contracts** - Rust-based escrow logic for creating contract between deller and buyer
 - **Horizon API** - Account management and queries
 
 ### Infrastructure
