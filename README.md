@@ -1,6 +1,6 @@
 # EXPO - Global Payment Router
 
-A next-generation cross-border payment platform built on the Stellar blockchain. EXPO enables instant, low-cost international payments with Universal IDs, smart escrow contracts, and seamless fiat-to-crypto conversion.
+A cross-border payment platform built on the Stellar blockchain. EXPO enables instant, low-cost international payments with Universal IDs, smart escrow contracts, and seamless fiat-to-crypto conversion.
 
 <img width="379" height="101" alt="image" src="https://github.com/user-attachments/assets/101d4866-070b-410b-a6ca-fdbce03a7cc2" />
 
