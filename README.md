@@ -63,6 +63,11 @@ Dashboard
 <img width="1376" height="845" alt="image" src="https://github.com/user-attachments/assets/92d14866-38c6-4fa0-92a8-57f3886e814d" />
 
 
+*Escrow -Create contract for your Work (between freelancer seller and buyer using Soroban Smart Contract*
+<img width="1349" height="745" alt="image" src="https://github.com/user-attachments/assets/65e66871-3955-4cb9-9899-0dafebdb9110" />
+
+
+
 ## Tech Stack
 
 ### Frontend
