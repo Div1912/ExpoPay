@@ -38,6 +38,23 @@ EXPO is a full-stack Web3 payment application that combines:
 - **On-Chain Settlement** - All payments recorded on Stellar blockchain
 - **Non-Custodial Design** - Users control their own keys
 
+
+##App screnshots
+
+Landing Page
+<img width="242" height="486" alt="Screenshot 2026-01-25 072624" src="https://github.com/user-attachments/assets/367f01ff-e920-491f-8d78-023a14187ce5" />
+
+
+<img width="776" height="846" alt="Screenshot 2026-01-25 112325" src="https://github.com/user-attachments/assets/b3a35739-9623-456e-ac69-d6e35458169e" />
+
+
+<img width="515" height="709" alt="Screenshot 2026-01-25 112225" src="https://github.com/user-attachments/assets/c44a7676-74ca-4969-a7fb-6656e3370c50" />
+
+<img width="610" height="901" alt="Screenshot 2026-01-25 081541" src="https://github.com/user-attachments/assets/f2e427a8-8c75-4761-9dc9-191b6bf0fef2" />
+
+Transaction History
+<img width="708" height="743" alt="Screenshot 2026-01-25 112310" src="https://github.com/user-attachments/assets/557ed12f-7777-464f-9c98-13ec884b8fdb" />
+
 ## Tech Stack
 
 ### Frontend
