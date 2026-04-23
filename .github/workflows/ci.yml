@@ -30,7 +30,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install Stellar CLI
-        run: cargo install stellar-cli --features opt
+        run: |
+          curl -sSL https://github.com/stellar/stellar-cli/releases/download/v22.9.1/stellar-cli-v22.9.1-x86_64-unknown-linux-gnu.tar.gz \
+            | tar -xz -C /usr/local/bin stellar
+          stellar version
 
       - name: Build contracts
         run: |
