@@ -29,9 +29,9 @@ jobs:
             contracts/escrow/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Install Stellar CLI
+      - name: Install Stellar CLI v22.8.2
         run: |
-          curl -sSL https://github.com/stellar/stellar-cli/releases/download/v22.9.1/stellar-cli-v22.9.1-x86_64-unknown-linux-gnu.tar.gz \
+          curl -sSL https://github.com/stellar/stellar-cli/releases/download/v22.8.2/stellar-cli-22.8.2-x86_64-unknown-linux-gnu.tar.gz \
             | tar -xz -C /usr/local/bin stellar
           stellar version
 
@@ -71,6 +71,7 @@ jobs:
           NEXT_PUBLIC_NETWORK: testnet
           NEXT_PUBLIC_ESCROW_CONTRACT_ID: ${{ secrets.NEXT_PUBLIC_ESCROW_CONTRACT_ID }}
           NEXT_PUBLIC_TOKEN_CONTRACT_ID: ${{ secrets.NEXT_PUBLIC_TOKEN_CONTRACT_ID }}
+          NEXT_PUBLIC_APP_URL: https://expopay.vercel.app
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
