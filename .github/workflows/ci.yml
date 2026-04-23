@@ -27,23 +27,21 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             contracts/escrow/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('contracts/escrow/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
-      - name: Install Stellar CLI v22.8.2
+      - name: Build Soroban contract (wasm)
+        working-directory: contracts/escrow
         run: |
-          curl -sSL https://github.com/stellar/stellar-cli/releases/download/v22.8.2/stellar-cli-22.8.2-x86_64-unknown-linux-gnu.tar.gz \
-            | tar -xz -C /usr/local/bin stellar
-          stellar version
-
-      - name: Build contracts
-        run: |
-          cd contracts/escrow
-          stellar contract build
+          cargo build \
+            --target wasm32-unknown-unknown \
+            --release \
+            --no-default-features
 
       - name: Run contract tests
-        run: |
-          cd contracts/escrow
-          cargo test -- --nocapture
+        working-directory: contracts/escrow
+        run: cargo test -- --nocapture
 
   deploy-frontend:
     name: Deploy Frontend to Vercel
