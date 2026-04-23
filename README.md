@@ -75,9 +75,6 @@ Dashboard
 *Escrow -Create contract for your Work (between freelancer seller and buyer using Soroban Smart Contract*
 <img width="1349" height="745" alt="image" src="https://github.com/user-attachments/assets/65e66871-3955-4cb9-9899-0dafebdb9110" />
 
-### Mobile Responsive View (375px — Green Belt Requirement)
-![Mobile View](./screenshots/mobile-view.png)
-
 ### CI/CD Pipeline — GitHub Actions
 ![CI Passing](./screenshots/ci-passing.png)
 
