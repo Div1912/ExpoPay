@@ -4,6 +4,15 @@ A cross-border payment platform built on the Stellar blockchain. EXPO enables in
 
 <img width="379" height="101" alt="image" src="https://github.com/user-attachments/assets/101d4866-070b-410b-a6ca-fdbce03a7cc2" />
 
+## 🔗 Live Demo
+[https://expopay.vercel.app](https://expopay.vercel.app)
+
+## 📱 Mobile Responsive View (375px)
+![Mobile View](./screenshots/mobile-view.png)
+
+## ⚙️ CI/CD Pipeline
+![CI/CD](https://github.com/Div1912/ExpoPay/actions/workflows/ci.yml/badge.svg)
+![CI Passing](./screenshots/ci-passing.png)
 
 ## Overview
 
@@ -66,7 +75,11 @@ Dashboard
 *Escrow -Create contract for your Work (between freelancer seller and buyer using Soroban Smart Contract*
 <img width="1349" height="745" alt="image" src="https://github.com/user-attachments/assets/65e66871-3955-4cb9-9899-0dafebdb9110" />
 
+### Mobile Responsive View (375px — Green Belt Requirement)
+![Mobile View](./screenshots/mobile-view.png)
 
+### CI/CD Pipeline — GitHub Actions
+![CI Passing](./screenshots/ci-passing.png)
 
 ## Tech Stack
 
@@ -163,14 +176,17 @@ expo/
 The escrow contract (`contracts/escrow/src/lib.rs`) provides:
 
 ### Functions
-| Function | Description | Auth Required |
-|----------|-------------|---------------|
-| `create` | Create and fund escrow | Buyer |
-| `deliver` | Mark work as delivered | Seller |
-| `release` | Release funds to seller | Buyer |
-| `dispute` | Raise a dispute | Buyer |
-| `refund` | Refund to buyer | Buyer (if disputed/expired) |
-| `get` | Query escrow state | None |
+| Function | Description | Inter-Contract Call |
+|---|---|---|
+| `create` | Create escrow with EXPO token_id | — |
+| `fund` | Client locks EXPO tokens in escrow | ✅ Client → Escrow (EXPO token) |
+| `deliver` | Freelancer marks work as delivered | — |
+| `release_funds` | Client releases EXPO tokens to freelancer | ✅ Escrow → Freelancer (EXPO token) |
+| `cancel_escrow` | Cancel and refund EXPO tokens to client | ✅ Escrow → Client (EXPO token) |
+| `dispute` | Raise a dispute | — |
+| `resolve` | Arbiter distributes EXPO tokens to winner | ✅ Escrow → Winner (EXPO token) |
+| `get_escrow` | Query escrow state | — |
+| `get_escrow_count` | Get total escrow count | — |
 
 ### Escrow States
 ```
@@ -180,9 +196,15 @@ Funded -> Delivered -> Released
 Disputed -> Refunded
 ```
 
-### Deployed Contract
-- **Contract ID**: `CAGMD6PBDSOSB2NDOE5ZGYCWH74EOBJFHM627WTGLZZF66DBRUFWYSPT`
-- **Network**: Stellar Testnet
+### Deployed Contracts (Stellar Testnet)
+| Contract | Address |
+|---|---|
+| Escrow Contract | `CAGMD6PBDSOSB2NDOE5ZGYCWH74EOBJFHM627WTGLZZF66DBRUFWYSPT` |
+| EXPO Token Contract | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN8` |
+
+### 🔁 Inter-Contract Call Transaction
+- **Tx Hash:** `d62faff341a803b549c7c244acb0e1fd502823ee4f9ce815c51cd9eebd473f76`
+- **Explorer:** [View on Stellar Expert](https://stellar.expert/explorer/testnet/tx/d62faff341a803b549c7c244acb0e1fd502823ee4f9ce815c51cd9eebd473f76)
 
 ## API Routes
 
@@ -231,7 +253,9 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_key
 SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
 STELLAR_NETWORK_PASSPHRASE=Test SDF Network ; September 2015
 ESCROW_CONTRACT_ID=CAGMD6PBDSOSB2NDOE5ZGYCWH74EOBJFHM627WTGLZZF66DBRUFWYSPT
-TOKEN_CONTRACT_ID=your_token_contract_id
+TOKEN_CONTRACT_ID=CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN8
+NEXT_PUBLIC_ESCROW_CONTRACT_ID=CAGMD6PBDSOSB2NDOE5ZGYCWH74EOBJFHM627WTGLZZF66DBRUFWYSPT
+NEXT_PUBLIC_TOKEN_CONTRACT_ID=CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCN8
 PLATFORM_SECRET_KEY=your_platform_wallet_secret
 
 # App
