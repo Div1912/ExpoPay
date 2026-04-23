@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Send, QrCode, History, User, Scan, LayoutDashboard, Store, Settings } from "lucide-react";
+import { Home, Send, QrCode, History, User, Scan, LayoutDashboard, Store, Settings, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 import { Background } from "@/components/Background";
@@ -22,7 +22,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       { label: "History", icon: History, href: "/dashboard/history" },
       { label: "Scan & Pay", icon: Scan, href: "/dashboard/scan", primary: true },
       { label: "Send", icon: Send, href: "/dashboard/send" },
-      { label: "Settings", icon: Settings, href: "/dashboard/settings" },
+      { label: "Contracts", icon: FileText, href: "/dashboard/contracts" },
     ];
 
   const sidebarItems = [
@@ -31,6 +31,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       { label: "Scan & Pay", icon: Scan, href: "/dashboard/scan" },
       { label: "Send Money", icon: Send, href: "/dashboard/send" },
       { label: "Pay Merchant", icon: Store, href: "/dashboard/merchant" },
+      { label: "Contracts", icon: FileText, href: "/dashboard/contracts" },
       { label: "My Code", icon: QrCode, href: "/dashboard/receive" },
     ];
 
