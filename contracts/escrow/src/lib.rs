@@ -296,19 +296,23 @@ impl EscrowContract {
 }
 
 #[cfg(test)]
+extern crate std;
+
+#[cfg(test)]
 mod tests {
     use super::*;
+    use std::format;
     use soroban_sdk::{
-        testutils::{Address as _, AuthorizedFunction, AuthorizedInvocation},
+        testutils::Address as _,
         token::{Client as TokenClient, StellarAssetClient},
-        Address, Env, IntoVal, String,
+        Address, Env, String,
     };
 
     fn create_test_env() -> (Env, Address, Address, Address, Address, Address) {
         let env = Env::default();
         env.mock_all_auths();
 
-        let contract_id = env.register_contract(None, EscrowContract);
+        let contract_id = env.register(EscrowContract, ());
         let token_admin = Address::generate(&env);
         let client_addr = Address::generate(&env);
         let freelancer_addr = Address::generate(&env);
