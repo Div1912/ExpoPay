@@ -3,7 +3,7 @@ import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { resolveEscrow } from '@/lib/escrow';
 
-const ADMIN_EMAILS = ['admin@expopay.app', 'support@expopay.app'];
+const ADMIN_EMAILS = ['admin@expopay.app', 'support@expopay.app', 'bkbhaia@gmail.com'];
 
 export async function POST(request: Request) {
   const user = await getUser();
