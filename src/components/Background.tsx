@@ -38,14 +38,14 @@ export function Background() {
             transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] max-w-[1000px] aspect-square rounded-full blur-[120px] md:blur-[200px]"
             style={{
-              background: 'conic-gradient(from 0deg, rgba(198,148,249,0.1), rgba(148,161,249,0.15), rgba(245,167,196,0.1), rgba(198,148,249,0.1))'
+              background: 'conic-gradient(from 0deg, rgba(198,148,249,0.3), rgba(148,161,249,0.35), rgba(245,167,196,0.3), rgba(198,148,249,0.3))'
             }}
           />
 
           {/* Mouse tracking orb */}
           <motion.div
             style={{ x: springX, y: springY }}
-            className="absolute top-1/4 left-1/4 w-[40vw] max-w-[500px] aspect-square rounded-full bg-[#C694F9]/20 blur-[100px] md:blur-[150px]"
+            className="absolute top-1/4 left-1/4 w-[40vw] max-w-[500px] aspect-square rounded-full bg-[#C694F9]/40 blur-[100px] md:blur-[150px]"
           />
 
           {/* Slow floating orb */}
@@ -56,7 +56,7 @@ export function Background() {
               scale: [1, 1.1, 1]
             }}
             transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute bottom-1/3 right-1/4 w-[35vw] max-w-[400px] aspect-square rounded-full bg-[#94A1F9]/15 blur-[80px] md:blur-[120px]"
+            className="absolute bottom-1/3 right-1/4 w-[35vw] max-w-[400px] aspect-square rounded-full bg-[#94A1F9]/30 blur-[80px] md:blur-[120px]"
           />
         </div>
       )}

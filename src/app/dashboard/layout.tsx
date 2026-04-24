@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     ];
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-[#C694F9]/30">
+    <div className="min-h-screen bg-transparent text-white selection:bg-[#C694F9]/30">
       <Background />
       
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-72 xl:w-80 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-6 xl:p-8 z-40">
