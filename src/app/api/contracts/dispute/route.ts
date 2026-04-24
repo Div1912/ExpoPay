@@ -71,7 +71,7 @@ export async function POST(request: Request) {
   try {
     const txHash = await disputeEscrow(contract.escrow_id, callerProfile.stellar_secret);
 
-    await supabaseAdmin
+    const { error: updateError } = await supabaseAdmin
       .from('contracts')
       .update({
         status:                 'disputed',
@@ -82,6 +82,11 @@ export async function POST(request: Request) {
         dispute_after_delivery: disputeAfterDelivery, // ← the bad-faith guard
       })
       .eq('id', contract_id);
+
+    if (updateError) {
+      console.error('Supabase update error:', updateError);
+      throw new Error(`Database error: ${updateError.message}. Did you run the SQL migration?`);
+    }
 
     const msg = isPayer
       ? disputeAfterDelivery

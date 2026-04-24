@@ -118,10 +118,12 @@ An arbiter will review the evidence and decide. Contact support@expopay.app with
       // Payer: legitimate refund (they disputed before delivery, or contract expired)
       const txHash = await refundEscrow(contract.escrow_id, callerProfile.stellar_secret);
 
-      await supabaseAdmin
+      const { error: refundError } = await supabaseAdmin
         .from('contracts')
         .update({ status: 'refunded', refunded_at: new Date().toISOString(), tx_hash_refund: txHash })
         .eq('id', contract_id);
+
+      if (refundError) throw new Error(`DB Error: ${refundError.message}`);
 
       return NextResponse.json({
         success: true,
