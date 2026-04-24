@@ -34,6 +34,7 @@ interface Contract {
   refunded_at?: string;
   dispute_reason?: string;
   disputed_by?: 'payer' | 'freelancer';
+  dispute_after_delivery?: boolean;
   tx_hash_create?: string;
   tx_hash_release?: string;
   tx_hash_refund?: string;
@@ -626,20 +627,65 @@ export default function ContractsPage() {
                     </div>
                   )}
 
-                    {/* ── 48h warning: client not responded after delivery ── */}
+                    {/* ── 48h warning + auto-release countdown for freelancer ── */}
                     {isFreelancer && contract.status === 'delivered' && contract.delivered_at && (
                       (() => {
-                        const hoursSinceDelivery = (Date.now() - new Date(contract.delivered_at).getTime()) / 36e5;
-                        return hoursSinceDelivery > 48 ? (
-                          <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-xs text-amber-400">
-                            <p className="font-bold mb-1">⚠️ Client has not responded in {Math.floor(hoursSinceDelivery)}h</p>
-                            <p className="text-amber-500/70">You can raise a dispute to freeze funds and claim payment.</p>
+                        const msElapsed = Date.now() - new Date(contract.delivered_at).getTime();
+                        const hoursElapsed = msElapsed / 36e5;
+                        const daysElapsed  = msElapsed / 864e5;
+                        const autoReleaseDays = 7;
+                        const daysLeft = Math.max(0, autoReleaseDays - daysElapsed);
+                        return (
+                          <div className={`p-3 rounded-xl border text-xs ${
+                            daysElapsed >= autoReleaseDays
+                              ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                              : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                          }`}>
+                            {daysElapsed >= autoReleaseDays ? (
+                              <>
+                                <p className="font-bold mb-1">✅ Auto-release available!</p>
+                                <p className="text-green-500/70">Client didn&apos;t respond in {autoReleaseDays} days. You can now claim your payment automatically.</p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="font-bold mb-1">⏳ {Math.floor(hoursElapsed)}h elapsed &mdash; Auto-release in {Math.ceil(daysLeft * 24)}h</p>
+                                <p className="text-amber-500/70">If client doesn&apos;t approve in {Math.ceil(daysLeft)} day{Math.ceil(daysLeft) !== 1 ? 's' : ''}, you can auto-claim your payment. Or dispute now.</p>
+                              </>
+                            )}
                           </div>
-                        ) : null;
+                        );
                       })()
                     )}
 
+                    {/* ── Bad-faith warning for payer who disputed after delivery ── */}
+                    {isPayer && contract.status === 'disputed' && contract.dispute_after_delivery && (
+                      <div className="p-3 bg-orange-500/10 rounded-xl border border-orange-500/20 text-xs text-orange-400">
+                        <p className="font-bold mb-1">⚠️ Arbiter review required</p>
+                        <p className="text-orange-500/70">
+                          You disputed this contract after the freelancer had already delivered the work.
+                          Self-refund is blocked to prevent abuse. Contact{' '}
+                          <a href="mailto:support@expopay.app" className="underline">support@expopay.app</a>
+                          {' '}with your evidence.
+                        </p>
+                      </div>
+                    )}
+
                     <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+                      {/* FREELANCER: auto-release after 7 days (no dispute needed) */}
+                      {isFreelancer && contract.status === 'delivered' && contract.delivered_at && (
+                        (() => {
+                          const daysElapsed = (Date.now() - new Date(contract.delivered_at).getTime()) / 864e5;
+                          return daysElapsed >= 7 ? (
+                            <Button
+                              onClick={() => { setSelectedContract(contract); setActionType('refund'); handleAction(''); }}
+                              disabled={actionLoading}
+                              className="h-10 bg-green-500 hover:bg-green-600 text-black font-bold rounded-lg gap-2"
+                            >
+                              <CheckCircle2 className="w-4 h-4" /> Auto-Release Payment
+                            </Button>
+                          ) : null;
+                        })()
+                      )}
 
                       {/* FREELANCER: mark as delivered */}
                       {isFreelancer && contract.status === 'funded' && (
@@ -697,8 +743,10 @@ export default function ContractsPage() {
                         </Button>
                       )}
 
-                      {/* PAYER: refund — only when THEY raised the dispute */}
-                      {isPayer && contract.status === 'disputed' && contract.disputed_by === 'payer' && (
+                      {/* PAYER: refund — only if THEY disputed AND it was BEFORE delivery */}
+                      {isPayer && contract.status === 'disputed' &&
+                        contract.disputed_by === 'payer' &&
+                        !contract.dispute_after_delivery && (
                         <Button
                           onClick={() => {
                             setSelectedContract(contract);
@@ -710,6 +758,15 @@ export default function ContractsPage() {
                         >
                           <DollarSign className="w-4 h-4" /> Request Refund
                         </Button>
+                      )}
+
+                      {/* PAYER: disputed after delivery → arbiter only, no refund button */}
+                      {isPayer && contract.status === 'disputed' &&
+                        contract.disputed_by === 'payer' &&
+                        contract.dispute_after_delivery && (
+                        <span className="h-10 px-3 flex items-center text-xs text-orange-400 border border-orange-500/20 rounded-lg gap-2 bg-orange-500/10">
+                          <Shield className="w-3 h-3" /> Arbiter review required — cannot self-refund
+                        </span>
                       )}
 
                       {/* PAYER: freelancer raised dispute — wait for arbiter */}

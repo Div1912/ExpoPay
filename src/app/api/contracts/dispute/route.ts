@@ -29,7 +29,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Contract not found' }, { status: 404 });
   }
 
-  // ── Both payer AND freelancer can raise a dispute ─────────────────────────
   const isPayer      = contract.payer_id      === user.id;
   const isFreelancer = contract.freelancer_id === user.id;
 
@@ -41,21 +40,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `Cannot dispute. Contract is already ${contract.status}` }, { status: 400 });
   }
 
-  // Freelancer can only dispute once they have marked work as delivered (client ghosted)
+  // ── Freelancer: can only dispute after delivering (client ghosted) ─────────
   if (isFreelancer && contract.status !== 'delivered') {
     return NextResponse.json({
       error: 'Freelancer can only dispute after marking work as delivered and the client has not responded'
     }, { status: 400 });
   }
 
-  // Payer can dispute at any funded/delivered stage
+  // ── Payer: can dispute at funded OR delivered stage ───────────────────────
   if (isPayer && !['funded', 'delivered'].includes(contract.status)) {
-    return NextResponse.json({
-      error: `Cannot dispute. Contract is ${contract.status}`
-    }, { status: 400 });
+    return NextResponse.json({ error: `Cannot dispute. Contract is ${contract.status}` }, { status: 400 });
   }
 
-  // Fetch the calling party's stellar secret to sign the on-chain tx
+  // ── CRITICAL: Track whether work was already delivered when payer disputes ─
+  // This prevents the "get work for free" attack:
+  //   client receives delivered work → disputes it → tries to self-refund
+  // If dispute_after_delivery = true → payer CANNOT self-refund. Arbiter decides.
+  const disputeAfterDelivery = isPayer && contract.status === 'delivered';
+
   const { data: callerProfile } = await supabaseAdmin
     .from('profiles')
     .select('stellar_secret')
@@ -72,16 +74,19 @@ export async function POST(request: Request) {
     await supabaseAdmin
       .from('contracts')
       .update({
-        status: 'disputed',
-        disputed_at: new Date().toISOString(),
-        tx_hash_dispute: txHash,
-        dispute_reason: reason,
-        disputed_by: isPayer ? 'payer' : 'freelancer',
+        status:                 'disputed',
+        disputed_at:            new Date().toISOString(),
+        tx_hash_dispute:        txHash,
+        dispute_reason:         reason,
+        disputed_by:            isPayer ? 'payer' : 'freelancer',
+        dispute_after_delivery: disputeAfterDelivery, // ← the bad-faith guard
       })
       .eq('id', contract_id);
 
     const msg = isPayer
-      ? 'Dispute raised. Funds are frozen. You may now request a refund.'
+      ? disputeAfterDelivery
+        ? 'Dispute raised. Funds are frozen. Since work was delivered, an arbiter will review your case — you cannot self-refund.'
+        : 'Dispute raised. Funds are frozen. You may request a refund.'
       : 'Dispute raised. Funds are frozen. You can now claim your payment.';
 
     return NextResponse.json({ success: true, tx_hash: txHash, message: msg });
