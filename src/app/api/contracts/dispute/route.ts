@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   }
 
   if (!reason || reason.trim().length < 10) {
-    return NextResponse.json({ error: 'Please provide a detailed reason for the dispute (min 10 characters)' }, { status: 400 });
+    return NextResponse.json({ error: 'Please provide a detailed reason (min 10 characters)' }, { status: 400 });
   }
 
   const { data: contract } = await supabaseAdmin
@@ -29,30 +29,45 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Contract not found' }, { status: 404 });
   }
 
-  if (contract.payer_id !== user.id) {
-    return NextResponse.json({ error: 'Only buyer/payer can raise a dispute' }, { status: 403 });
+  // ── Both payer AND freelancer can raise a dispute ─────────────────────────
+  const isPayer      = contract.payer_id      === user.id;
+  const isFreelancer = contract.freelancer_id === user.id;
+
+  if (!isPayer && !isFreelancer) {
+    return NextResponse.json({ error: 'You are not a party to this contract' }, { status: 403 });
   }
 
-  if (contract.status === 'released' || contract.status === 'refunded') {
-    return NextResponse.json({ error: `Cannot dispute. Contract already ${contract.status}` }, { status: 400 });
+  if (['released', 'refunded', 'disputed'].includes(contract.status)) {
+    return NextResponse.json({ error: `Cannot dispute. Contract is already ${contract.status}` }, { status: 400 });
   }
 
-  if (contract.status === 'disputed') {
-    return NextResponse.json({ error: 'Contract already in dispute' }, { status: 400 });
+  // Freelancer can only dispute once they have marked work as delivered (client ghosted)
+  if (isFreelancer && contract.status !== 'delivered') {
+    return NextResponse.json({
+      error: 'Freelancer can only dispute after marking work as delivered and the client has not responded'
+    }, { status: 400 });
   }
 
-  const { data: payerProfile } = await supabaseAdmin
+  // Payer can dispute at any funded/delivered stage
+  if (isPayer && !['funded', 'delivered'].includes(contract.status)) {
+    return NextResponse.json({
+      error: `Cannot dispute. Contract is ${contract.status}`
+    }, { status: 400 });
+  }
+
+  // Fetch the calling party's stellar secret to sign the on-chain tx
+  const { data: callerProfile } = await supabaseAdmin
     .from('profiles')
-    .select('*')
+    .select('stellar_secret')
     .eq('id', user.id)
     .single();
 
-  if (!payerProfile?.stellar_secret) {
+  if (!callerProfile?.stellar_secret) {
     return NextResponse.json({ error: 'Wallet not found' }, { status: 404 });
   }
 
   try {
-    const txHash = await disputeEscrow(contract.escrow_id, payerProfile.stellar_secret);
+    const txHash = await disputeEscrow(contract.escrow_id, callerProfile.stellar_secret);
 
     await supabaseAdmin
       .from('contracts')
@@ -61,14 +76,15 @@ export async function POST(request: Request) {
         disputed_at: new Date().toISOString(),
         tx_hash_dispute: txHash,
         dispute_reason: reason,
+        disputed_by: isPayer ? 'payer' : 'freelancer',
       })
       .eq('id', contract_id);
 
-    return NextResponse.json({
-      success: true,
-      tx_hash: txHash,
-      message: 'Dispute raised on-chain. You can now request a refund.'
-    });
+    const msg = isPayer
+      ? 'Dispute raised. Funds are frozen. You may now request a refund.'
+      : 'Dispute raised. Funds are frozen. You can now claim your payment.';
+
+    return NextResponse.json({ success: true, tx_hash: txHash, message: msg });
   } catch (error: any) {
     console.error('Dispute contract error:', error);
     return NextResponse.json({ error: error.message || 'Failed to raise dispute' }, { status: 500 });

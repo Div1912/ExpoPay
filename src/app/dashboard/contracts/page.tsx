@@ -33,9 +33,11 @@ interface Contract {
   disputed_at?: string;
   refunded_at?: string;
   dispute_reason?: string;
+  disputed_by?: 'payer' | 'freelancer';
   tx_hash_create?: string;
   tx_hash_release?: string;
   tx_hash_refund?: string;
+  tx_hash_dispute?: string;
 }
 
 function PinModal({ isOpen, onClose, onSubmit, loading, title }: { 
@@ -419,18 +421,22 @@ export default function ContractsPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 p-4 glass-card rounded-2xl">
+      <div className="grid grid-cols-4 gap-4 p-4 glass-card rounded-2xl">
         <div className="text-center">
           <p className="text-2xl font-black text-[#C694F9]">{contracts.filter(c => c.status === 'released').length}</p>
           <p className="text-xs text-zinc-500 uppercase tracking-wider">Completed</p>
         </div>
         <div className="text-center border-x border-white/10">
-          <p className="text-2xl font-black text-amber-400">{contracts.filter(c => ['created', 'funded', 'delivered'].includes(c.status)).length}</p>
+          <p className="text-2xl font-black text-amber-400">{contracts.filter(c => ['funded', 'delivered'].includes(c.status)).length}</p>
           <p className="text-xs text-zinc-500 uppercase tracking-wider">Active</p>
         </div>
-        <div className="text-center">
+        <div className="text-center border-r border-white/10">
           <p className="text-2xl font-black text-red-400">{contracts.filter(c => c.status === 'disputed').length}</p>
           <p className="text-xs text-zinc-500 uppercase tracking-wider">Disputed</p>
+        </div>
+        <div className="text-center">
+          <p className="text-2xl font-black text-zinc-400">{contracts.filter(c => c.status === 'refunded').length}</p>
+          <p className="text-xs text-zinc-500 uppercase tracking-wider">Refunded</p>
         </div>
       </div>
 
@@ -620,7 +626,22 @@ export default function ContractsPage() {
                     </div>
                   )}
 
+                    {/* ── 48h warning: client not responded after delivery ── */}
+                    {isFreelancer && contract.status === 'delivered' && contract.delivered_at && (
+                      (() => {
+                        const hoursSinceDelivery = (Date.now() - new Date(contract.delivered_at).getTime()) / 36e5;
+                        return hoursSinceDelivery > 48 ? (
+                          <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-xs text-amber-400">
+                            <p className="font-bold mb-1">⚠️ Client has not responded in {Math.floor(hoursSinceDelivery)}h</p>
+                            <p className="text-amber-500/70">You can raise a dispute to freeze funds and claim payment.</p>
+                          </div>
+                        ) : null;
+                      })()
+                    )}
+
                     <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+
+                      {/* FREELANCER: mark as delivered */}
                       {isFreelancer && contract.status === 'funded' && (
                         <Button
                           onClick={() => handleDeliver(contract.id)}
@@ -631,34 +652,58 @@ export default function ContractsPage() {
                         </Button>
                       )}
 
+                      {/* FREELANCER: dispute if client ghosts after delivery */}
+                      {isFreelancer && contract.status === 'delivered' && (
+                        <Button
+                          onClick={() => { setSelectedContract(contract); setShowDisputeModal(true); }}
+                          variant="outline"
+                          disabled={actionLoading}
+                          className="h-10 border-amber-500/40 text-amber-400 hover:bg-amber-500/10 font-bold rounded-lg gap-2"
+                        >
+                          <AlertTriangle className="w-4 h-4" /> Client Not Paying? Dispute
+                        </Button>
+                      )}
+
+                      {/* FREELANCER: claim funds after they raised the dispute */}
+                      {isFreelancer && contract.status === 'disputed' && contract.disputed_by === 'freelancer' && (
+                        <Button
+                          onClick={() => { setSelectedContract(contract); setActionType('refund'); handleAction(''); }}
+                          disabled={actionLoading}
+                          className="h-10 bg-green-500 hover:bg-green-600 text-black font-bold rounded-lg gap-2"
+                        >
+                          <DollarSign className="w-4 h-4" /> Claim Payment
+                        </Button>
+                      )}
+
+                      {/* FREELANCER: waiting for arbiter if payer disputed */}
+                      {isFreelancer && contract.status === 'disputed' && contract.disputed_by === 'payer' && (
+                        <span className="h-10 px-3 flex items-center text-xs text-zinc-500 border border-white/5 rounded-lg gap-2">
+                          <Shield className="w-3 h-3" /> Awaiting Arbiter Review
+                        </span>
+                      )}
+
+                      {/* PAYER: approve and release funds */}
                       {isPayer && (contract.status === 'delivered' || contract.status === 'funded') && (
                         <Button
                           onClick={() => {
                             setSelectedContract(contract);
                             setActionType('release');
-                            if (profile?.app_pin) {
-                              setShowPinModal(true);
-                            } else {
-                              handleAction('');
-                            }
+                            if (profile?.app_pin) { setShowPinModal(true); } else { handleAction(''); }
                           }}
                           disabled={actionLoading}
                           className="h-10 bg-green-500 hover:bg-green-600 text-black font-bold rounded-lg gap-2"
                         >
-                          <CheckCircle2 className="w-4 h-4" /> Release Funds
+                          <CheckCircle2 className="w-4 h-4" /> Approve & Release
                         </Button>
                       )}
 
-                      {isPayer && contract.status === 'disputed' && (
+                      {/* PAYER: refund — only when THEY raised the dispute */}
+                      {isPayer && contract.status === 'disputed' && contract.disputed_by === 'payer' && (
                         <Button
                           onClick={() => {
                             setSelectedContract(contract);
                             setActionType('refund');
-                            if (profile?.app_pin) {
-                              setShowPinModal(true);
-                            } else {
-                              handleAction('');
-                            }
+                            if (profile?.app_pin) { setShowPinModal(true); } else { handleAction(''); }
                           }}
                           disabled={actionLoading}
                           className="h-10 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg gap-2"
@@ -667,12 +712,17 @@ export default function ContractsPage() {
                         </Button>
                       )}
 
+                      {/* PAYER: freelancer raised dispute — wait for arbiter */}
+                      {isPayer && contract.status === 'disputed' && contract.disputed_by === 'freelancer' && (
+                        <span className="h-10 px-3 flex items-center text-xs text-amber-400 border border-amber-500/20 rounded-lg gap-2 bg-amber-500/10">
+                          <AlertTriangle className="w-3 h-3" /> Freelancer raised a dispute — awaiting arbiter
+                        </span>
+                      )}
+
+                      {/* PAYER: raise dispute */}
                       {isPayer && !['released', 'refunded', 'disputed'].includes(contract.status) && (
                         <Button
-                          onClick={() => {
-                            setSelectedContract(contract);
-                            setShowDisputeModal(true);
-                          }}
+                          onClick={() => { setSelectedContract(contract); setShowDisputeModal(true); }}
                           variant="outline"
                           className="h-10 border-red-500/30 text-red-400 hover:bg-red-500/10 font-bold rounded-lg gap-2"
                         >
@@ -680,14 +730,14 @@ export default function ContractsPage() {
                         </Button>
                       )}
 
-                      {(contract.tx_hash_release || contract.tx_hash_create) && (
+                      {/* View on-chain */}
+                      {(contract.tx_hash_release || contract.tx_hash_dispute || contract.tx_hash_create) && (
                         <a
-                          href={`https://stellar.expert/explorer/testnet/tx/${contract.tx_hash_release || contract.tx_hash_create}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href={`https://stellar.expert/explorer/testnet/tx/${contract.tx_hash_release || contract.tx_hash_dispute || contract.tx_hash_create}`}
+                          target="_blank" rel="noopener noreferrer"
                           className="h-10 px-4 flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 border border-blue-500/30 rounded-lg"
                         >
-                          <ExternalLink className="w-3 h-3" /> View Transaction
+                          <ExternalLink className="w-3 h-3" /> View on Stellar
                         </a>
                       )}
 

@@ -124,18 +124,19 @@ export async function releaseEscrow(escrowId: number, buyerSecret: string): Prom
   return hash;
 }
 
-export async function disputeEscrow(escrowId: number, buyerSecret: string): Promise<string> {
-  const keypair = StellarSdk.Keypair.fromSecret(buyerSecret);
-  const buyerAddress = keypair.publicKey();
+export async function disputeEscrow(escrowId: number, callerSecret: string): Promise<string> {
+  const keypair = StellarSdk.Keypair.fromSecret(callerSecret);
+  const callerAddress = keypair.publicKey();
   
   const args = [
     StellarSdk.nativeToScVal(escrowId, { type: 'u64' }),
   ];
   
-  const tx = await buildAndPrepareTransaction(buyerAddress, 'dispute', args);
+  const tx = await buildAndPrepareTransaction(callerAddress, 'dispute', args);
   const { hash } = await signAndSubmitTransaction(tx, keypair);
   return hash;
 }
+
 
 export async function refundEscrow(escrowId: number, buyerSecret: string): Promise<string> {
   const keypair = StellarSdk.Keypair.fromSecret(buyerSecret);
