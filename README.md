@@ -5,7 +5,7 @@ A cross-border payment platform built on the Stellar blockchain. EXPO enables in
 <img width="379" height="101" alt="image" src="https://github.com/user-attachments/assets/101d4866-070b-410b-a6ca-fdbce03a7cc2" />
 
 ## 🔗 Live Demo
-[https://expopay.vercel.app](https://expopay.vercel.app)
+[https://expopay.vercel.app](https://exporouter.site)
 
 
 ## ⚙️ CI/CD Pipeline
