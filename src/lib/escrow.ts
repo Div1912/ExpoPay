@@ -151,6 +151,20 @@ export async function refundEscrow(escrowId: number, buyerSecret: string): Promi
   return hash;
 }
 
+export async function resolveEscrow(escrowId: number, arbiterSecret: string, payFreelancer: boolean): Promise<string> {
+  const keypair = StellarSdk.Keypair.fromSecret(arbiterSecret);
+  const arbiterAddress = keypair.publicKey();
+  
+  const args = [
+    StellarSdk.nativeToScVal(escrowId, { type: 'u64' }),
+    StellarSdk.nativeToScVal(payFreelancer, { type: 'bool' }),
+  ];
+  
+  const tx = await buildAndPrepareTransaction(arbiterAddress, 'resolve', args);
+  const { hash } = await signAndSubmitTransaction(tx, keypair);
+  return hash;
+}
+
 export async function getEscrow(escrowId: number): Promise<EscrowData | null> {
   try {
     const contract = new StellarSdk.Contract(CONTRACT_ID);
