@@ -192,7 +192,7 @@ export default function LoginPage() {
             transition={{ duration: 0.8, delay: 0.7 }}
             className="w-full flex justify-center"
           >
-            <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+            <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "273981797365-ke6n33in7sr83gngo8h3fin80m529cqk.apps.googleusercontent.com"}>
               <GoogleLogin
                 onSuccess={async (credentialResponse) => {
                   const { credential } = credentialResponse;
