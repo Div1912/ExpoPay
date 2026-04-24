@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Background } from "@/components/Background";
 import { Mail, Lock, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
