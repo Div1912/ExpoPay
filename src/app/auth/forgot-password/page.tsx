@@ -21,16 +21,15 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError("");
 
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password`,
-    });
+    // Use resetPasswordForEmail but we will instruct user to use OTP
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email);
 
     if (resetError) {
       setError(resetError.message);
+      setLoading(false);
     } else {
-      setSuccess(true);
+      router.push(`/auth/verify-reset-otp?email=${encodeURIComponent(email)}`);
     }
-    setLoading(false);
   };
 
   return (

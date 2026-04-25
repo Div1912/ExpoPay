@@ -43,25 +43,18 @@ export default function SignupPage() {
     setLoading(true);
     setError("");
 
-    const { data, error: signupError } = await supabase.auth.signUp({
+    const { error: signupError } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      }
     });
 
     if (signupError) {
       setError(signupError.message);
       setLoading(false);
     } else {
-      if (data.user) {
-        await supabase.from('profiles').insert({
-          id: data.user.id,
-          email: data.user.email
-        });
-      }
-      router.push("/onboarding");
+      // Store the password temporarily in sessionStorage so we can log them in if needed,
+      // or just rely on verifyOtp returning a session.
+      router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
     }
   };
 
