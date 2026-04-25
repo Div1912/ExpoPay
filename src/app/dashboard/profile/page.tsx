@@ -86,14 +86,14 @@ export default function ProfilePage() {
           </div>
           
           <div className="relative z-10 space-y-10">
-            <div className="flex items-center gap-6">
-              <div className="w-24 h-24 bg-blue-600/20 rounded-[2rem] flex items-center justify-center border border-blue-500/20 shadow-2xl shadow-blue-600/20">
-                <span className="text-4xl font-black text-blue-500">{profile?.universal_id?.[0].toUpperCase()}</span>
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-blue-600/20 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center border border-blue-500/20 shadow-2xl shadow-blue-600/20">
+                <span className="text-3xl sm:text-4xl font-black text-blue-500">{profile?.universal_id?.[0].toUpperCase()}</span>
               </div>
-              <div className="space-y-1">
-                <h3 className="text-4xl font-black tracking-tight uppercase leading-none">{profile?.universal_id}@expo</h3>
-                <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
-                  <Mail className="w-3 h-3" /> {profile?.email}
+              <div className="space-y-1 min-w-0 w-full">
+                <h3 className="text-2xl sm:text-4xl font-black tracking-tight uppercase leading-none truncate">{profile?.universal_id}@expo</h3>
+                <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs flex items-center justify-center sm:justify-start gap-2 truncate">
+                  <Mail className="w-3 h-3 shrink-0" /> <span className="truncate">{profile?.email}</span>
                 </p>
               </div>
             </div>
@@ -196,23 +196,23 @@ export default function ProfilePage() {
         </div>
 
         {/* Security Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Button variant="outline" className="h-20 bg-white/5 hover:bg-white/10 border-white/10 rounded-3xl gap-4 group justify-start px-8">
-            <div className="p-3 bg-white/5 rounded-xl group-hover:bg-blue-600/20 transition-colors">
-              <Key className="w-6 h-6 text-blue-500" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          <Button variant="outline" className="h-20 bg-white/5 hover:bg-white/10 border-white/10 rounded-3xl gap-3 sm:gap-4 group justify-start px-4 sm:px-8">
+            <div className="p-3 bg-white/5 rounded-xl group-hover:bg-blue-600/20 transition-colors shrink-0">
+              <Key className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
             </div>
-            <div className="text-left">
-              <p className="font-black text-sm uppercase tracking-tight">MANAGE KEYS</p>
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Secure hardware backup</p>
+            <div className="text-left min-w-0">
+              <p className="font-black text-xs sm:text-sm uppercase tracking-tight truncate">MANAGE KEYS</p>
+              <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-600 truncate">Secure hardware backup</p>
             </div>
           </Button>
-          <Button variant="outline" className="h-20 bg-white/5 hover:bg-white/10 border-white/10 rounded-3xl gap-4 group justify-start px-8">
-            <div className="p-3 bg-white/5 rounded-xl group-hover:bg-purple-600/20 transition-colors">
-              <Lock className="w-6 h-6 text-purple-500" />
+          <Button variant="outline" className="h-20 bg-white/5 hover:bg-white/10 border-white/10 rounded-3xl gap-3 sm:gap-4 group justify-start px-4 sm:px-8">
+            <div className="p-3 bg-white/5 rounded-xl group-hover:bg-purple-600/20 transition-colors shrink-0">
+              <Lock className="w-5 h-5 sm:w-6 sm:h-6 text-purple-500" />
             </div>
-            <div className="text-left">
-              <p className="font-black text-sm uppercase tracking-tight">2FA SETTINGS</p>
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">Identity verification</p>
+            <div className="text-left min-w-0">
+              <p className="font-black text-xs sm:text-sm uppercase tracking-tight truncate">2FA SETTINGS</p>
+              <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-600 truncate">Identity verification</p>
             </div>
           </Button>
         </div>

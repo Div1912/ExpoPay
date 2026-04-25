@@ -181,7 +181,7 @@ export default function DashboardPage() {
                 <div className="space-y-3 sm:space-y-4 min-w-0 flex-1">
                     <p className="text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-[#C694F9]">Available Balance</p>
                     <div className="flex items-baseline gap-2 sm:gap-4 flex-wrap">
-                      <h2 className="text-[clamp(2.5rem,8vw,5rem)] font-bold tracking-tight leading-none truncate">
+                      <h2 className="text-[clamp(2.5rem,8vw,5rem)] font-black tracking-tight leading-none truncate" style={{ fontFamily: 'var(--font-syne)' }}>
                         {currencySymbol}{displayBalance}
                       </h2>
                       <span className="text-lg sm:text-xl md:text-3xl font-black text-white/30 tracking-widest shrink-0">{preferredCurrency}</span>
