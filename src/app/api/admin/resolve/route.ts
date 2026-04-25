@@ -41,27 +41,26 @@ export async function POST(request: Request) {
     const payFreelancer = resolution === 'pay_freelancer';
     const newStatus = payFreelancer ? 'released' : 'refunded';
 
-    // CRITICAL: To force resolution on-chain, we sign using the Payer's secret
-    // because the deployed contract's release/refund methods require payer authorization.
-    // The Admin backend retrieves the Payer's secret to execute the Arbiter's decision.
-    const { data: payerProfile } = await supabaseAdmin
+    // The deployed contract has a dedicated `resolve(escrowId, pay_freelancer)` function
+    // for arbiter dispute resolution. This works in disputed state for BOTH outcomes.
+    // `release` panics in disputed state (requires delivered=true) — wrong function.
+    // The admin IS the arbiter, so we sign with the admin's own stellar_secret.
+    const { data: adminProfile } = await supabaseAdmin
       .from('profiles')
       .select('stellar_secret')
-      .eq('id', contract.payer_id)
+      .eq('id', user.id)
       .single();
 
-    if (!payerProfile?.stellar_secret) {
-      return NextResponse.json({ error: "Payer's wallet not found. Cannot resolve on-chain." }, { status: 500 });
+    if (!adminProfile?.stellar_secret) {
+      return NextResponse.json({ error: 'Arbiter wallet not found. Cannot resolve on-chain.' }, { status: 500 });
     }
 
-    let txHash: string;
-    if (payFreelancer) {
-      const { releaseEscrow } = await import('@/lib/escrow');
-      txHash = await releaseEscrow(Number(contract.escrow_id), payerProfile.stellar_secret);
-    } else {
-      const { refundEscrow } = await import('@/lib/escrow');
-      txHash = await refundEscrow(Number(contract.escrow_id), payerProfile.stellar_secret);
-    }
+    const { resolveEscrow } = await import('@/lib/escrow');
+    const txHash = await resolveEscrow(
+      Number(contract.escrow_id),
+      adminProfile.stellar_secret,
+      payFreelancer
+    );
 
     await supabaseAdmin
       .from('contracts')
