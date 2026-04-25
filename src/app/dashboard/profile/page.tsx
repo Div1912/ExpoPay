@@ -101,9 +101,11 @@ export default function ProfilePage() {
             <div className="grid gap-6">
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 ml-1">EXPO Universal ID</label>
-                <div className="group relative flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all">
-                  <span className="font-black text-blue-500 text-lg tracking-tight uppercase">{profile?.universal_id}@expo</span>
-                  <button onClick={copyId} className="p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
+                <div className="group relative flex items-center justify-between p-4 sm:p-5 bg-white/5 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all gap-4">
+                  <div className="min-w-0 flex-1">
+                    <span className="font-black text-blue-500 text-lg tracking-tight uppercase truncate block w-full">{profile?.universal_id}@expo</span>
+                  </div>
+                  <button onClick={copyId} className="p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors shrink-0">
                     <AnimatePresence mode="wait">
                       {copiedId ? (
                         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} key="check">
@@ -121,9 +123,11 @@ export default function ProfilePage() {
 
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 ml-1">On-Chain Stellar Address</label>
-                <div className="group relative flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all">
-                  <code className="text-xs text-zinc-500 font-mono truncate mr-8 group-hover:text-zinc-300 transition-colors">{profile?.stellar_address}</code>
-                  <div className="flex gap-2">
+                <div className="group relative flex items-center justify-between p-4 sm:p-5 bg-white/5 rounded-2xl border border-white/5 hover:border-blue-500/30 transition-all gap-4">
+                  <div className="min-w-0 flex-1">
+                    <code className="text-xs text-zinc-500 font-mono truncate block w-full group-hover:text-zinc-300 transition-colors">{profile?.stellar_address}</code>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
                     <button onClick={copyAddr} className="p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-colors">
                       <AnimatePresence mode="wait">
                         {copiedAddr ? (
