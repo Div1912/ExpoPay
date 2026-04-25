@@ -7,6 +7,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motio
 import { Check, Loader2, Shield, ArrowRight, ExternalLink, Sparkles, AlertCircle, User, Phone, Lock, Coins, Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { Logo } from "@/components/Logo";
 import Link from "next/link";
 
 const steps = [
@@ -213,12 +214,9 @@ export default function OnboardingPage() {
       </div>
 
       <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-6 py-4 bg-transparent">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#C694F9] to-[#94A1F9] flex items-center justify-center">
-            <span className="text-white font-black text-[10px]">E</span>
-          </div>
-          <span className="text-white font-black text-xl tracking-tight" style={{ fontFamily: 'var(--font-syne)' }}>EXPO</span>
-        </div>
+        <Link href="/">
+          <Logo />
+        </Link>
         <div className="flex gap-1">
             {steps.map((s, i) => (
                 <div 

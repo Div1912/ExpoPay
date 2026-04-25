@@ -1,182 +1,229 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Settings, Shield, Lock, Eye, EyeOff, Check, Loader2, 
-  AlertCircle, ChevronRight, User, Globe, Bell, QrCode,
-  Copy, Download
+import {
+  User, Bell, Shield, Info, HelpCircle, LogOut,
+  ChevronRight, Check, Loader2, Mail,
+  Lock, Globe, ExternalLink, MessageSquare,
+  Star, AlertCircle, Camera,
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { QRCodeSVG } from "qrcode.react";
+import { Input } from "@/components/ui/input";
+import { Logo } from "@/components/Logo";
 
-const CURRENCIES = [
-  { code: 'USDC', name: 'US Dollar', symbol: '$' },
-  { code: 'INR', name: 'Indian Rupee', symbol: '₹' },
-  { code: 'EUR', name: 'Euro', symbol: '€' },
-  { code: 'GBP', name: 'British Pound', symbol: '£' },
-  { code: 'XLM', name: 'Stellar Lumens', symbol: 'XLM' },
-];
+/* ─── Types ─────────────────────────────────────────────────────── */
+interface Profile {
+  id: string;
+  email?: string;
+  full_name?: string;
+  phone_number?: string;
+  universal_id?: string;
+  preferred_currency?: string;
+  app_pin?: string;
+  avatar_url?: string;
+}
 
+/* ─── Section wrapper ────────────────────────────────────────────── */
+function Section({
+  id,
+  icon: Icon,
+  iconColor,
+  title,
+  subtitle,
+  active,
+  onToggle,
+  children,
+  delay = 0,
+}: {
+  id: string;
+  icon: React.ElementType;
+  iconColor: string;
+  title: string;
+  subtitle: string;
+  active: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  return (
+    <motion.div
+      className="glass-card rounded-2xl overflow-hidden"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+    >
+      <button
+        onClick={onToggle}
+        className="w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors"
+      >
+        <div className="flex items-center gap-4">
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center"
+            style={{ background: `${iconColor}20` }}
+          >
+            <Icon className="w-6 h-6" style={{ color: iconColor }} />
+          </div>
+          <div className="text-left">
+            <p className="font-bold text-base">{title}</p>
+            <p className="text-zinc-500 text-sm">{subtitle}</p>
+          </div>
+        </div>
+        <ChevronRight
+          className={`w-5 h-5 text-zinc-500 transition-transform duration-300 ${active ? "rotate-90" : ""}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-white/5 p-6 pt-5 space-y-5">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+/* ─── Toggle switch ──────────────────────────────────────────────── */
+function Toggle({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <button
+      onClick={() => onChange(!checked)}
+      className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
+        checked ? "bg-[#C694F9]" : "bg-white/10"
+      }`}
+    >
+      <motion.div
+        className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow"
+        animate={{ x: checked ? 20 : 0 }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+      />
+    </button>
+  );
+}
+
+/* ─── Row inside a section ───────────────────────────────────────── */
+function Row({
+  label,
+  description,
+  children,
+}: {
+  label: string;
+  description?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div>
+        <p className="font-medium text-sm">{label}</p>
+        {description && (
+          <p className="text-zinc-500 text-xs mt-0.5">{description}</p>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/* ─── Main page ──────────────────────────────────────────────────── */
 export default function SettingsPage() {
-  const [profile, setProfile] = useState<any>(null);
+  const router = useRouter();
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
-  
-  const [currentPin, setCurrentPin] = useState(['', '', '', '']);
-  const [newPin, setNewPin] = useState(['', '', '', '']);
-  const [confirmPin, setConfirmPin] = useState(['', '', '', '']);
-  const [pinStep, setPinStep] = useState<'current' | 'new' | 'confirm'>('current');
-  const [pinLoading, setPinLoading] = useState(false);
-  const [pinError, setPinError] = useState('');
-  
-  const currentPinRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const newPinRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const confirmPinRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [active, setActive] = useState<string | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
 
-  const [demoAmount, setDemoAmount] = useState("500");
-  const [demoMerchant, setDemoMerchant] = useState("Demo Store");
-  const [demoUpiId, setDemoUpiId] = useState("demostore@upi");
-  
-  const [selectedCurrency, setSelectedCurrency] = useState('USDC');
-  const [currencyLoading, setCurrencyLoading] = useState(false);
+  // User Info edit state
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [savingInfo, setSavingInfo] = useState(false);
+
+  // Notification preferences
+  const [notifPayments, setNotifPayments] = useState(true);
+  const [notifContracts, setNotifContracts] = useState(true);
+  const [notifMarketing, setNotifMarketing] = useState(false);
+  const [notifSecurity, setNotifSecurity] = useState(true);
+
+  // Privacy
+  const [showBalance, setShowBalance] = useState(true);
+  const [twoFactor, setTwoFactor] = useState(false);
+
+  // Feedback
+  const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [sendingFeedback, setSendingFeedback] = useState(false);
+
+  const toggle = (id: string) => setActive((p) => (p === id ? null : id));
 
   useEffect(() => {
     fetch("/api/expo/profile")
-      .then(res => res.json())
-      .then(data => {
-        setProfile(data);
-        setSelectedCurrency(data.preferred_currency || 'USDC');
+      .then((r) => r.json())
+      .then((d) => {
+        setProfile(d);
+        setEditName(d.full_name || "");
+        setEditPhone(d.phone_number || "");
         setLoading(false);
-        if (!data.app_pin) setPinStep('new');
-      });
+      })
+      .catch(() => setLoading(false));
   }, []);
 
-  const handleCurrencyChange = async (currency: string) => {
-    setSelectedCurrency(currency);
-    setCurrencyLoading(true);
+  const handleSaveInfo = async () => {
+    setSavingInfo(true);
     try {
-      const res = await fetch('/api/expo/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ preferred_currency: currency }),
+      const res = await fetch("/api/expo/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ full_name: editName, phone_number: editPhone }),
       });
       if (res.ok) {
-        setProfile({ ...profile, preferred_currency: currency });
-        toast.success(`Currency changed to ${currency}`);
+        setProfile((p) => p ? { ...p, full_name: editName, phone_number: editPhone } : p);
+        toast.success("Profile updated");
+        setActive(null);
       } else {
-        toast.error('Failed to update currency');
+        toast.error("Failed to update profile");
       }
     } catch {
-      toast.error('Failed to update currency');
+      toast.error("Failed to update profile");
     } finally {
-      setCurrencyLoading(false);
+      setSavingInfo(false);
     }
   };
 
-  const handlePinInput = (
-    index: number, 
-    value: string, 
-    pinArray: string[], 
-    setPinArray: (arr: string[]) => void,
-    refs: React.MutableRefObject<(HTMLInputElement | null)[]>
-  ) => {
-    if (!/^\d*$/.test(value)) return;
-    const newArr = [...pinArray];
-    newArr[index] = value.slice(-1);
-    setPinArray(newArr);
-    if (value && index < 3) refs.current[index + 1]?.focus();
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    await supabase.auth.signOut();
+    router.push("/auth/login");
   };
 
-  const handlePinKeyDown = (
-    index: number, 
-    e: React.KeyboardEvent,
-    pinArray: string[],
-    refs: React.MutableRefObject<(HTMLInputElement | null)[]>
-  ) => {
-    if (e.key === 'Backspace' && !pinArray[index] && index > 0) {
-      refs.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePinReset = async () => {
-    setPinError('');
-    
-    if (pinStep === 'current' && profile?.app_pin) {
-      if (currentPin.some(d => d === '')) {
-        setPinError('Please enter your current PIN');
-        return;
-      }
-      setPinStep('new');
-      setTimeout(() => newPinRefs.current[0]?.focus(), 100);
+  const handleFeedback = async () => {
+    if (!feedbackText.trim()) {
+      toast.error("Please enter your feedback");
       return;
     }
-
-    if (pinStep === 'new') {
-      if (newPin.some(d => d === '')) {
-        setPinError('Please enter a new PIN');
-        return;
-      }
-      setPinStep('confirm');
-      setTimeout(() => confirmPinRefs.current[0]?.focus(), 100);
-      return;
-    }
-
-    if (pinStep === 'confirm') {
-      if (confirmPin.some(d => d === '')) {
-        setPinError('Please confirm your PIN');
-        return;
-      }
-      if (newPin.join('') !== confirmPin.join('')) {
-        setPinError('PINs do not match');
-        setConfirmPin(['', '', '', '']);
-        setTimeout(() => confirmPinRefs.current[0]?.focus(), 100);
-        return;
-      }
-
-      setPinLoading(true);
-      try {
-        const res = await fetch('/api/expo/pin', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            current_pin: profile?.app_pin ? currentPin.join('') : undefined,
-            new_pin: newPin.join(''),
-          }),
-        });
-        const data = await res.json();
-        if (data.error) {
-          setPinError(data.error);
-          if (data.error.includes('Current PIN')) {
-            setPinStep('current');
-            setCurrentPin(['', '', '', '']);
-          }
-        } else {
-          toast.success('PIN updated successfully');
-          setActiveSection(null);
-          setCurrentPin(['', '', '', '']);
-          setNewPin(['', '', '', '']);
-          setConfirmPin(['', '', '', '']);
-          setPinStep(profile?.app_pin ? 'current' : 'new');
-          setProfile({ ...profile, app_pin: newPin.join('') });
-        }
-      } catch {
-        setPinError('Failed to update PIN');
-      } finally {
-        setPinLoading(false);
-      }
-    }
-  };
-
-  const generateDemoQR = () => {
-    return `upi://pay?pa=${demoUpiId}&pn=${encodeURIComponent(demoMerchant)}&am=${demoAmount}&cu=INR`;
-  };
-
-  const copyDemoQR = () => {
-    navigator.clipboard.writeText(generateDemoQR());
-    toast.success('UPI link copied to clipboard');
+    setSendingFeedback(true);
+    await new Promise((r) => setTimeout(r, 1200));
+    setSendingFeedback(false);
+    setFeedbackText("");
+    setFeedbackRating(0);
+    toast.success("Thank you for your feedback!");
+    setActive(null);
   };
 
   if (loading) {
@@ -188,303 +235,410 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 pb-20">
-      <div className="text-center space-y-3">
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight uppercase">SETTINGS</h1>
-        <p className="text-zinc-500">Manage your account and security</p>
-      </div>
-
-      <div className="space-y-4">
-        <motion.div 
-          className="glass-card rounded-2xl overflow-hidden"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+    <div className="max-w-2xl mx-auto space-y-3 pb-24">
+      {/* Header */}
+      <motion.div
+        className="text-center space-y-2 mb-8"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h1
+          className="text-4xl md:text-5xl font-black tracking-tight uppercase"
+          style={{ fontFamily: "var(--font-syne)" }}
         >
+          Settings
+        </h1>
+        <p className="text-zinc-500 text-sm">
+          Manage your account, privacy and preferences
+        </p>
+      </motion.div>
+
+      {/* ── 1. User Info ──────────────────────────────────── */}
+      <Section
+        id="userinfo"
+        icon={User}
+        iconColor="#C694F9"
+        title="User Information"
+        subtitle={profile?.full_name || profile?.email || "Manage your profile"}
+        active={active === "userinfo"}
+        onToggle={() => toggle("userinfo")}
+        delay={0.05}
+      >
+        {/* Avatar placeholder */}
+        <div className="flex items-center gap-4 pb-4 border-b border-white/5">
+          <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[#C694F9] to-[#94A1F9] flex items-center justify-center text-2xl font-black shadow-lg">
+            {profile?.full_name?.[0]?.toUpperCase() || "U"}
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-zinc-800 border border-white/10 rounded-full flex items-center justify-center">
+              <Camera className="w-3 h-3 text-white/60" />
+            </div>
+          </div>
+          <div>
+            <p className="font-bold">{profile?.full_name || "—"}</p>
+            <p className="text-zinc-500 text-sm">{profile?.email}</p>
+            {profile?.universal_id && (
+              <p className="text-[#C694F9] text-xs font-bold mt-0.5">
+                {profile.universal_id}@expo
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              Full Name
+            </label>
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Your full name"
+              className="bg-white/5 border-white/10 h-12 rounded-xl"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              Phone Number
+            </label>
+            <Input
+              value={editPhone}
+              onChange={(e) => setEditPhone(e.target.value)}
+              placeholder="+91 98765 43210"
+              className="bg-white/5 border-white/10 h-12 rounded-xl"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              Email (read-only)
+            </label>
+            <Input
+              value={profile?.email || ""}
+              disabled
+              className="bg-white/[0.02] border-white/5 h-12 rounded-xl opacity-50 cursor-not-allowed"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={handleSaveInfo}
+          disabled={savingInfo}
+          className="w-full h-12 rounded-xl bg-[#C694F9] hover:bg-[#C694F9]/90 text-black font-bold text-sm transition-all flex items-center justify-center gap-2"
+        >
+          {savingInfo ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <>
+              <Check className="w-4 h-4" /> Save Changes
+            </>
+          )}
+        </button>
+      </Section>
+
+      {/* ── 2. Notifications & Emails ─────────────────────── */}
+      <Section
+        id="notifications"
+        icon={Bell}
+        iconColor="#F5A7C4"
+        title="Notifications & Emails"
+        subtitle="Choose what you hear about"
+        active={active === "notifications"}
+        onToggle={() => toggle("notifications")}
+        delay={0.1}
+      >
+        <Row
+          label="Payment Alerts"
+          description="Get notified for every transaction"
+        >
+          <Toggle checked={notifPayments} onChange={setNotifPayments} />
+        </Row>
+        <Row
+          label="Contract Updates"
+          description="Status changes on your contracts"
+        >
+          <Toggle checked={notifContracts} onChange={setNotifContracts} />
+        </Row>
+        <Row
+          label="Security Alerts"
+          description="Login attempts & suspicious activity"
+        >
+          <Toggle checked={notifSecurity} onChange={setNotifSecurity} />
+        </Row>
+        <Row
+          label="Marketing & News"
+          description="Product updates, offers & tips"
+        >
+          <Toggle checked={notifMarketing} onChange={setNotifMarketing} />
+        </Row>
+
+        <button
+          onClick={() => {
+            toast.success("Notification preferences saved");
+            setActive(null);
+          }}
+          className="w-full h-12 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold text-sm transition-all"
+        >
+          Save Preferences
+        </button>
+      </Section>
+
+      {/* ── 3. Privacy & Security ─────────────────────────── */}
+      <Section
+        id="security"
+        icon={Shield}
+        iconColor="#94A1F9"
+        title="Privacy & Security"
+        subtitle="Control your data and access"
+        active={active === "security"}
+        onToggle={() => toggle("security")}
+        delay={0.15}
+      >
+        <Row
+          label="Show Balance on Dashboard"
+          description="Hide balance for extra privacy"
+        >
+          <Toggle checked={showBalance} onChange={setShowBalance} />
+        </Row>
+        <Row
+          label="Two-Factor Authentication"
+          description="Extra layer of login security"
+        >
+          <Toggle
+            checked={twoFactor}
+            onChange={(v) => {
+              setTwoFactor(v);
+              toast.info(v ? "2FA enabled (demo)" : "2FA disabled (demo)");
+            }}
+          />
+        </Row>
+
+        <div className="pt-2 border-t border-white/5 space-y-3">
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+            Account
+          </p>
           <button
-            onClick={() => setActiveSection(activeSection === 'pin' ? null : 'pin')}
-            className="w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors"
+            onClick={() => {
+              setActive(null);
+              router.push("/dashboard/settings?section=pin");
+            }}
+            className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center justify-between"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-[#C694F9]/20 rounded-xl flex items-center justify-center">
-                <Lock className="w-6 h-6 text-[#C694F9]" />
-              </div>
+            <div className="flex items-center gap-3">
+              <Lock className="w-5 h-5 text-zinc-400" />
               <div className="text-left">
-                <p className="font-bold text-lg">{profile?.app_pin ? 'Change PIN' : 'Set PIN'}</p>
-                <p className="text-zinc-500 text-sm">Secure your transactions</p>
+                <p className="font-semibold text-sm">
+                  {profile?.app_pin ? "Change PIN" : "Set Transaction PIN"}
+                </p>
+                <p className="text-zinc-500 text-xs">
+                  Secure your payments
+                </p>
               </div>
             </div>
-            <ChevronRight className={`w-5 h-5 text-zinc-500 transition-transform ${activeSection === 'pin' ? 'rotate-90' : ''}`} />
+            <ChevronRight className="w-4 h-4 text-zinc-500" />
           </button>
 
-          <AnimatePresence>
-            {activeSection === 'pin' && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="p-6 pt-0 space-y-6 border-t border-white/5">
-                  <div className="text-center space-y-2">
-                    <p className="text-sm text-zinc-400">
-                      {pinStep === 'current' && 'Enter your current PIN'}
-                      {pinStep === 'new' && 'Enter a new 4-digit PIN'}
-                      {pinStep === 'confirm' && 'Confirm your new PIN'}
-                    </p>
-                  </div>
-
-                  <div className="flex justify-center gap-3">
-                    {pinStep === 'current' && [0, 1, 2, 3].map((i) => (
-                      <input
-                        key={`current-${i}`}
-                        ref={(el) => { currentPinRefs.current[i] = el; }}
-                        type="password"
-                        inputMode="numeric"
-                        maxLength={1}
-                        value={currentPin[i]}
-                        onChange={(e) => handlePinInput(i, e.target.value, currentPin, setCurrentPin, currentPinRefs)}
-                        onKeyDown={(e) => handlePinKeyDown(i, e, currentPin, currentPinRefs)}
-                        className="w-14 h-14 text-center text-2xl font-black bg-white/5 border-2 border-white/10 rounded-xl focus:border-[#C694F9] focus:outline-none"
-                      />
-                    ))}
-                    {pinStep === 'new' && [0, 1, 2, 3].map((i) => (
-                      <input
-                        key={`new-${i}`}
-                        ref={(el) => { newPinRefs.current[i] = el; }}
-                        type="password"
-                        inputMode="numeric"
-                        maxLength={1}
-                        value={newPin[i]}
-                        onChange={(e) => handlePinInput(i, e.target.value, newPin, setNewPin, newPinRefs)}
-                        onKeyDown={(e) => handlePinKeyDown(i, e, newPin, newPinRefs)}
-                        className="w-14 h-14 text-center text-2xl font-black bg-white/5 border-2 border-white/10 rounded-xl focus:border-[#C694F9] focus:outline-none"
-                      />
-                    ))}
-                    {pinStep === 'confirm' && [0, 1, 2, 3].map((i) => (
-                      <input
-                        key={`confirm-${i}`}
-                        ref={(el) => { confirmPinRefs.current[i] = el; }}
-                        type="password"
-                        inputMode="numeric"
-                        maxLength={1}
-                        value={confirmPin[i]}
-                        onChange={(e) => handlePinInput(i, e.target.value, confirmPin, setConfirmPin, confirmPinRefs)}
-                        onKeyDown={(e) => handlePinKeyDown(i, e, confirmPin, confirmPinRefs)}
-                        className="w-14 h-14 text-center text-2xl font-black bg-white/5 border-2 border-white/10 rounded-xl focus:border-[#C694F9] focus:outline-none"
-                      />
-                    ))}
-                  </div>
-
-                  {pinError && (
-                    <p className="text-red-400 text-sm text-center flex items-center justify-center gap-2">
-                      <AlertCircle className="w-4 h-4" /> {pinError}
-                    </p>
-                  )}
-
-                  <Button
-                    onClick={handlePinReset}
-                    disabled={pinLoading}
-                    className="w-full h-14 bg-[#C694F9] hover:bg-[#C694F9]/90 text-black font-black rounded-xl"
-                  >
-                    {pinLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                      pinStep === 'confirm' ? 'SAVE PIN' : 'CONTINUE'
-                    )}
-                  </Button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-
-        <motion.div 
-          className="glass-card rounded-2xl overflow-hidden"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
           <button
-            onClick={() => setActiveSection(activeSection === 'demo' ? null : 'demo')}
-            className="w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors"
+            onClick={() => toast.info("Data export coming soon")}
+            className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center justify-between"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                <QrCode className="w-6 h-6 text-green-500" />
-              </div>
+            <div className="flex items-center gap-3">
+              <Globe className="w-5 h-5 text-zinc-400" />
               <div className="text-left">
-                <p className="font-bold text-lg">Demo UPI QR Generator</p>
-                <p className="text-zinc-500 text-sm">Test merchant payments</p>
+                <p className="font-semibold text-sm">Export My Data</p>
+                <p className="text-zinc-500 text-xs">Download your account data</p>
               </div>
             </div>
-            <ChevronRight className={`w-5 h-5 text-zinc-500 transition-transform ${activeSection === 'demo' ? 'rotate-90' : ''}`} />
+            <ChevronRight className="w-4 h-4 text-zinc-500" />
           </button>
 
-          <AnimatePresence>
-            {activeSection === 'demo' && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="p-6 pt-0 space-y-6 border-t border-white/5">
-                  <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-400 text-xs">
-                    <p className="font-bold mb-1">Demo Mode</p>
-                    <p className="text-amber-500/70">This QR is for testing the merchant payment flow. No real money is involved.</p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Merchant Name</label>
-                      <Input
-                        value={demoMerchant}
-                        onChange={(e) => setDemoMerchant(e.target.value)}
-                        className="bg-white/5 border-white/10 h-12 rounded-xl"
-                        placeholder="Demo Store"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">UPI ID</label>
-                      <Input
-                        value={demoUpiId}
-                        onChange={(e) => setDemoUpiId(e.target.value)}
-                        className="bg-white/5 border-white/10 h-12 rounded-xl"
-                        placeholder="merchant@upi"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Amount (INR)</label>
-                      <Input
-                        type="number"
-                        value={demoAmount}
-                        onChange={(e) => setDemoAmount(e.target.value)}
-                        className="bg-white/5 border-white/10 h-12 rounded-xl"
-                        placeholder="500"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-center">
-                    <div className="p-4 bg-white rounded-2xl">
-                      <QRCodeSVG 
-                        value={generateDemoQR()} 
-                        size={180}
-                        level="H"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="text-center space-y-1">
-                    <p className="font-black text-lg">{demoMerchant}</p>
-                    <p className="text-zinc-500 text-sm">{demoUpiId}</p>
-                    <p className="text-2xl font-black text-green-500">₹{parseFloat(demoAmount || '0').toLocaleString('en-IN')}</p>
-                  </div>
-
-                  <Button
-                    onClick={copyDemoQR}
-                    variant="outline"
-                    className="w-full h-12 border-white/10 rounded-xl font-bold gap-2"
-                  >
-                    <Copy className="w-4 h-4" /> Copy UPI Link
-                  </Button>
-
-                  <p className="text-[10px] text-zinc-600 text-center">
-                    Scan this QR from the "Pay Merchant (UPI)" or "Scan & Pay" screen
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-
-        <motion.div 
-            className="glass-card rounded-2xl overflow-hidden"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+          <button
+            onClick={() => toast.error("Account deletion — contact support")}
+            className="w-full p-4 rounded-xl bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 transition-all flex items-center justify-between"
           >
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400" />
+              <div className="text-left">
+                <p className="font-semibold text-sm text-red-400">
+                  Delete Account
+                </p>
+                <p className="text-red-500/60 text-xs">
+                  Permanently remove your data
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-red-500/60" />
+          </button>
+        </div>
+      </Section>
+
+      {/* ── 4. About ──────────────────────────────────────── */}
+      <Section
+        id="about"
+        icon={Info}
+        iconColor="#60a5fa"
+        title="About"
+        subtitle="Version, legal & blockchain info"
+        active={active === "about"}
+        onToggle={() => toggle("about")}
+        delay={0.2}
+      >
+        {/* Logo */}
+        <div className="flex items-center justify-center py-4">
+          <Logo size="large" />
+        </div>
+
+        <div className="space-y-3 text-sm">
+          {[
+            ["App Version", "1.0.0 (production)"],
+            ["Network", "Stellar Testnet"],
+            ["Auth", "Supabase + Google OAuth"],
+            ["Payments", "Soroban Smart Contracts"],
+          ].map(([k, v]) => (
+            <div key={k} className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+              <span className="text-zinc-500">{k}</span>
+              <span className="font-semibold text-white">{v}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <a
+            href="https://stellar.org"
+            target="_blank"
+            rel="noreferrer"
+            className="flex-1 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 text-zinc-400"
+          >
+            <ExternalLink className="w-3.5 h-3.5" /> Stellar
+          </a>
+          <a
+            href="https://supabase.com"
+            target="_blank"
+            rel="noreferrer"
+            className="flex-1 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 text-zinc-400"
+          >
+            <ExternalLink className="w-3.5 h-3.5" /> Supabase
+          </a>
+          <button
+            onClick={() => toast.info("Terms of Service coming soon")}
+            className="flex-1 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 text-zinc-400"
+          >
+            Terms
+          </button>
+        </div>
+      </Section>
+
+      {/* ── 5. Help & Feedback ────────────────────────────── */}
+      <Section
+        id="help"
+        icon={HelpCircle}
+        iconColor="#34d399"
+        title="Help & Feedback"
+        subtitle="Get support or share your thoughts"
+        active={active === "help"}
+        onToggle={() => toggle("help")}
+        delay={0.25}
+      >
+        {/* Quick links */}
+        <div className="space-y-2">
+          {[
+            { label: "FAQs", sub: "Common questions answered", icon: HelpCircle },
+            { label: "Contact Support", sub: "Email us at support@expo.app", icon: Mail },
+            { label: "Report a Bug", sub: "Found something broken?", icon: AlertCircle },
+          ].map((item) => (
             <button
-              onClick={() => setActiveSection(activeSection === 'currency' ? null : 'currency')}
-              className="w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors"
+              key={item.label}
+              onClick={() => toast.info(`${item.label} — coming soon`)}
+              className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center gap-3"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-                  <Globe className="w-6 h-6 text-green-500" />
-                </div>
-                <div className="text-left">
-                  <p className="font-bold text-lg">Preferred Currency</p>
-                  <p className="text-zinc-500 text-sm">Select your display currency</p>
-                </div>
+              <item.icon className="w-5 h-5 text-zinc-400 shrink-0" />
+              <div className="text-left">
+                <p className="font-semibold text-sm">{item.label}</p>
+                <p className="text-zinc-500 text-xs">{item.sub}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="font-black text-[#C694F9]">{selectedCurrency}</span>
-                <ChevronRight className={`w-5 h-5 text-zinc-500 transition-transform ${activeSection === 'currency' ? 'rotate-90' : ''}`} />
-              </div>
+              <ChevronRight className="w-4 h-4 text-zinc-600 ml-auto" />
             </button>
+          ))}
+        </div>
 
-            <AnimatePresence>
-              {activeSection === 'currency' && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-6 pt-0 space-y-4 border-t border-white/5">
-                    <p className="text-sm text-zinc-400">Choose your preferred currency for transactions</p>
-                    <div className="space-y-2">
-                      {CURRENCIES.map((currency) => (
-                        <button
-                          key={currency.code}
-                          onClick={() => handleCurrencyChange(currency.code)}
-                          disabled={currencyLoading}
-                          className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
-                            selectedCurrency === currency.code 
-                              ? 'bg-[#C694F9]/20 border-2 border-[#C694F9]' 
-                              : 'bg-white/5 border-2 border-transparent hover:bg-white/10'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center font-black text-lg">
-                              {currency.symbol}
-                            </span>
-                            <div className="text-left">
-                              <p className="font-bold">{currency.code}</p>
-                              <p className="text-xs text-zinc-500">{currency.name}</p>
-                            </div>
-                          </div>
-                          {selectedCurrency === currency.code && (
-                            <Check className="w-5 h-5 text-[#C694F9]" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          <motion.div 
-            className="glass-card rounded-2xl p-5"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+        {/* Feedback form */}
+        <div className="pt-4 border-t border-white/5 space-y-4">
+          <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+            Rate your experience
+          </p>
+          <div className="flex gap-2 justify-center">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setFeedbackRating(star)}
+                className="transition-transform hover:scale-110 active:scale-95"
+              >
+                <Star
+                  className={`w-8 h-8 ${
+                    star <= feedbackRating
+                      ? "text-[#F5A7C4] fill-[#F5A7C4]"
+                      : "text-white/20"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+          <textarea
+            value={feedbackText}
+            onChange={(e) => setFeedbackText(e.target.value)}
+            placeholder="Tell us what you think…"
+            rows={3}
+            className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-[#C694F9]/40 resize-none"
+          />
+          <button
+            onClick={handleFeedback}
+            disabled={sendingFeedback}
+            className="w-full h-12 rounded-xl bg-gradient-to-r from-[#C694F9] to-[#94A1F9] text-white font-bold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                <User className="w-6 h-6 text-blue-500" />
-              </div>
-              <div className="flex-1">
-                <p className="font-bold text-lg">Profile</p>
-                <p className="text-zinc-500 text-sm">{profile?.full_name || 'Not set'}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500">Currency</p>
-                <p className="font-bold">{profile?.preferred_currency || 'USDC'}</p>
-              </div>
-            </div>
-          </motion.div>
-      </div>
+            {sendingFeedback ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <MessageSquare className="w-4 h-4" /> Send Feedback
+              </>
+            )}
+          </button>
+        </div>
+      </Section>
+
+      {/* ── 6. Sign Out ───────────────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <button
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="w-full p-5 rounded-2xl bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 transition-all flex items-center gap-4 group"
+        >
+          <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center">
+            {signingOut ? (
+              <Loader2 className="w-6 h-6 text-red-400 animate-spin" />
+            ) : (
+              <LogOut className="w-6 h-6 text-red-400 group-hover:translate-x-0.5 transition-transform" />
+            )}
+          </div>
+          <div className="text-left">
+            <p className="font-bold text-red-400">Sign Out</p>
+            <p className="text-red-500/60 text-sm">
+              {signingOut ? "Signing you out…" : "End your current session"}
+            </p>
+          </div>
+        </button>
+      </motion.div>
+
+      {/* Footer */}
+      <motion.p
+        className="text-center text-zinc-700 text-xs pt-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
+        EXPO · v1.0.0 · Built on Stellar
+      </motion.p>
     </div>
   );
 }

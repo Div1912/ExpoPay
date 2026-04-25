@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Send, QrCode, History, User, Scan, LayoutDashboard, Store, Settings, FileText } from "lucide-react";
+import { Send, QrCode, History, User, Scan, LayoutDashboard, Store, Settings, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 import { Background } from "@/components/Background";
+import { InactivityGuard } from "@/components/InactivityGuard";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -36,6 +37,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     ];
 
   return (
+    <InactivityGuard>
     <div className="min-h-screen bg-transparent text-white selection:bg-[#C694F9]/30">
       <Background />
       
@@ -140,5 +142,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         ))}
       </nav>
     </div>
+    </InactivityGuard>
   );
 }

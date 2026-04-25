@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Background } from "@/components/Background";
+import { Logo } from "@/components/Logo";
 import { Mail, Lock, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
@@ -69,23 +70,8 @@ export default function SignupPage() {
       <Background />
 
         <nav className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 bg-transparent">
-          <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group">
-            <div className="relative w-8 sm:w-9 h-8 sm:h-9">
-              <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 rounded-full border-2 border-white/30"
-              />
-              <motion.div 
-                animate={{ rotate: -360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-1 rounded-full border-t-2 border-l-2 border-white/60"
-              />
-              <div className="absolute inset-2 rounded-md bg-gradient-to-br from-[#C694F9] via-[#F5A7C4] to-[#94A1F9] shadow-[0_0_20px_rgba(198,148,249,0.7)] flex items-center justify-center p-0.5">
-                <span className="text-white font-black text-[10px]" style={{ fontFamily: 'var(--font-syne)' }}>E</span>
-              </div>
-            </div>
-            <span className="text-white font-black text-lg sm:text-xl tracking-tight group-hover:text-iridescent transition-all duration-300" style={{ fontFamily: 'var(--font-syne)' }}>EXPO</span>
+          <Link href="/">
+            <Logo />
           </Link>
         <Link
           href="/auth/login"
