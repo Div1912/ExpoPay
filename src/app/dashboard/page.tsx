@@ -3,11 +3,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Check, ArrowUpRight, ArrowDownLeft, QrCode, Scan, History, Loader2, ExternalLink, Zap, Shield, Globe, Wallet, ArrowRight, Store, FileText } from "lucide-react";
+import { Copy, Check, ArrowUpRight, ArrowDownLeft, QrCode, Scan, History, Loader2, ExternalLink, Zap, Shield, Wallet, ArrowRight, Store, FileText } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { PaySearch } from "@/components/PaySearch";
 
 export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -17,6 +18,7 @@ export default function DashboardPage() {
   const [copied, setCopied] = useState(false);
   const [convertedBalance, setConvertedBalance] = useState("0.00");
   const [xlmBalance, setXlmBalance] = useState("0.00");
+  const [recentContacts, setRecentContacts] = useState<any[]>([]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -54,6 +56,25 @@ export default function DashboardPage() {
       setConvertedBalance(balanceData.converted_balance || "0.00");
       setXlmBalance(balanceData.xlm_balance || "0.00");
       setTransactions(allTx);
+
+      // Build recent contacts from sent P2P transactions (unique recipients)
+      const seen = new Set<string>();
+      const contacts: any[] = [];
+      for (const tx of p2pTx) {
+        const uid = tx.sender_id === profileData?.id
+          ? tx.recipient_universal_id
+          : null; // only outgoing
+        if (uid && !seen.has(uid)) {
+          seen.add(uid);
+          contacts.push({
+            username: uid,
+            display_name: uid,
+            last_paid_at: tx.created_at,
+            currency: tx.currency || 'XLM',
+          });
+        }
+      }
+      setRecentContacts(contacts.slice(0, 8));
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
@@ -128,10 +149,11 @@ export default function DashboardPage() {
     const currencySymbol = currencySymbols[preferredCurrency] || '';
 
   return (
-    <div className="space-y-8 sm:space-y-12 pb-20">
-      <section className="flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8">
+    <div className="space-y-8 sm:space-y-10 pb-20">
+      {/* ── Header ── */}
+      <section className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
         <div>
-          <h1 className="text-[clamp(2rem,8vw,4rem)] font-black tracking-tight mb-3 sm:mb-4 uppercase leading-[0.9]" style={{ fontFamily: 'var(--font-syne)' }}>
+          <h1 className="text-[clamp(2rem,8vw,4rem)] font-black tracking-tight mb-2 sm:mb-3 uppercase leading-[0.9]" style={{ fontFamily: 'var(--font-syne)' }}>
             OVERVIEW
           </h1>
           <div 
@@ -153,17 +175,43 @@ export default function DashboardPage() {
             </AnimatePresence>
           </div>
         </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="flex flex-col items-end">
-            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Network Status</span>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,1)] animate-pulse" />
-              <span className="text-xs sm:text-sm font-bold uppercase tracking-tight">STELLAR TESTNET</span>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,1)] animate-pulse" />
+          <span className="text-xs font-bold uppercase tracking-tight text-white/60">Stellar Testnet</span>
         </div>
       </section>
+
+      {/* ── Google-Pay-style Search ── */}
+      <section>
+        <PaySearch recentContacts={recentContacts} />
+      </section>
+
+      {/* ── People (recent contacts) ── */}
+      {recentContacts.length > 0 && (
+        <section>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-white/30 mb-4">People</h3>
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            {recentContacts.map((p, i) => (
+              <motion.a
+                key={p.username}
+                href={`/dashboard/send?to=${encodeURIComponent(p.username)}@expo`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="flex flex-col items-center gap-2 min-w-[64px] group cursor-pointer"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#C694F9]/20 to-[#94A1F9]/20 border border-[#C694F9]/20 flex items-center justify-center font-black text-[#C694F9] text-xl uppercase transition-all group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(198,148,249,0.3)] group-active:scale-95">
+                  {(p.display_name || p.username)[0]}
+                </div>
+                <span className="text-[10px] font-bold text-white/50 truncate w-16 text-center group-hover:text-white/80 transition-colors">
+                  {p.display_name || p.username}
+                </span>
+              </motion.a>
+            ))}
+          </div>
+        </section>
+      )}
+    
 
       <section>
         <motion.div
