@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/lib/supabase";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,6 +16,33 @@ function VerifyEmailInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const email = searchParams.get("email") || "";
+
+  const [resendLoading, setResendLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60);
+
+  useEffect(() => {
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [timeLeft]);
+
+  const handleResend = async () => {
+    setResendLoading(true);
+    setError("");
+
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+    });
+
+    if (resendError) {
+      setError(resendError.message);
+    } else {
+      setTimeLeft(60);
+    }
+    setResendLoading(false);
+  };
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +134,21 @@ function VerifyEmailInner() {
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Verify Code"}
               </span>
             </button>
+
+            <div className="mt-6 text-center">
+              {timeLeft > 0 ? (
+                <p className="text-white/40 text-sm font-medium">Resend code in {timeLeft}s</p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendLoading}
+                  className="text-[#C694F9] text-sm font-medium hover:text-white transition-colors disabled:opacity-50"
+                >
+                  {resendLoading ? "Sending..." : "Resend Code"}
+                </button>
+              )}
+            </div>
           </form>
         </motion.div>
       </main>
