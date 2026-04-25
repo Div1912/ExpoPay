@@ -65,13 +65,6 @@ export default function ProfilePage() {
           </h1>
           <p className="text-zinc-500 font-medium text-lg">Manage your universal payment identity</p>
         </div>
-        <Button 
-          onClick={handleLogout}
-          variant="outline" 
-          className="h-14 px-8 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:border-red-500/40 font-black uppercase tracking-widest rounded-2xl gap-3"
-        >
-          <LogOut className="w-5 h-5" /> Sign Out
-        </Button>
       </div>
 
       <div className="grid gap-8">
@@ -79,7 +72,7 @@ export default function ProfilePage() {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-8 md:p-10 rounded-[2.5rem] relative overflow-hidden"
+          className="glass-card p-5 sm:p-8 md:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] relative overflow-hidden"
         >
           <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none">
             <User className="w-64 h-64" />
@@ -157,8 +150,8 @@ export default function ProfilePage() {
         </motion.div>
 
         {/* System & Security Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card className="glass-card p-8 rounded-[2rem] border-none flex flex-col justify-between group">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+          <Card className="glass-card p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border-none flex flex-col justify-between group">
             <div className="space-y-6">
               <div className="w-14 h-14 bg-purple-600/20 rounded-2xl flex items-center justify-center border border-purple-500/20 text-purple-500 group-hover:scale-110 transition-transform">
                 <Shield className="w-7 h-7" />
@@ -176,7 +169,7 @@ export default function ProfilePage() {
             </div>
           </Card>
 
-          <Card className="glass-card p-8 rounded-[2rem] border-none flex flex-col justify-between group">
+          <Card className="glass-card p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border-none flex flex-col justify-between group">
             <div className="space-y-6">
               <div className="w-14 h-14 bg-blue-600/20 rounded-2xl flex items-center justify-center border border-blue-500/20 text-blue-500 group-hover:scale-110 transition-transform">
                 <Globe className="w-7 h-7" />

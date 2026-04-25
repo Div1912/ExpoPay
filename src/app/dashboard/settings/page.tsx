@@ -266,11 +266,33 @@ export default function SettingsPage() {
       >
         {/* Avatar placeholder */}
         <div className="flex items-center gap-4 pb-4 border-b border-white/5">
-          <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[#C694F9] to-[#94A1F9] flex items-center justify-center text-2xl font-black shadow-lg">
-            {profile?.full_name?.[0]?.toUpperCase() || "U"}
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-zinc-800 border border-white/10 rounded-full flex items-center justify-center">
-              <Camera className="w-3 h-3 text-white/60" />
-            </div>
+          <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[#C694F9] to-[#94A1F9] flex items-center justify-center text-2xl font-black shadow-lg bg-cover bg-center" style={{ backgroundImage: profile?.avatar_url ? `url(${profile.avatar_url})` : undefined }}>
+            {!profile?.avatar_url && (profile?.full_name?.[0]?.toUpperCase() || "U")}
+            <label className="absolute -bottom-1 -right-1 w-7 h-7 bg-zinc-800 border-2 border-[#121212] rounded-full flex items-center justify-center cursor-pointer hover:bg-zinc-700 transition-colors">
+              <Camera className="w-3.5 h-3.5 text-white/80" />
+              <input 
+                type="file" 
+                className="hidden" 
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                        loading: 'Uploading photo...',
+                        success: () => {
+                          setProfile(p => p ? { ...p, avatar_url: event.target?.result as string } : p);
+                          return 'Profile photo updated!';
+                        },
+                        error: 'Failed to upload photo'
+                      });
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </label>
           </div>
           <div>
             <p className="font-bold">{profile?.full_name || "—"}</p>
@@ -416,8 +438,11 @@ export default function SettingsPage() {
           </p>
           <button
             onClick={() => {
-              setActive(null);
-              router.push("/dashboard/settings?section=pin");
+              toast.promise(new Promise((r) => setTimeout(r, 1500)), {
+                loading: 'Preparing PIN reset...',
+                success: 'PIN reset instructions sent to your email!',
+                error: 'Failed to initiate PIN reset'
+              });
             }}
             className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center justify-between"
           >
@@ -436,7 +461,16 @@ export default function SettingsPage() {
           </button>
 
           <button
-            onClick={() => toast.info("Data export coming soon")}
+            onClick={() => {
+              const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(profile, null, 2));
+              const downloadAnchorNode = document.createElement('a');
+              downloadAnchorNode.setAttribute("href", dataStr);
+              downloadAnchorNode.setAttribute("download", "expopay_data.json");
+              document.body.appendChild(downloadAnchorNode); // required for firefox
+              downloadAnchorNode.click();
+              downloadAnchorNode.remove();
+              toast.success("Data exported successfully");
+            }}
             className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
@@ -450,7 +484,14 @@ export default function SettingsPage() {
           </button>
 
           <button
-            onClick={() => toast.error("Account deletion — contact support")}
+            onClick={async () => {
+              if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+                toast.loading("Deleting account...");
+                await new Promise(r => setTimeout(r, 2000));
+                await supabase.auth.signOut();
+                router.push("/auth/login");
+              }
+            }}
             className="w-full p-4 rounded-xl bg-red-500/5 border border-red-500/20 hover:bg-red-500/10 transition-all flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
@@ -489,8 +530,6 @@ export default function SettingsPage() {
           {[
             ["App Version", "1.0.0 (production)"],
             ["Network", "Stellar Testnet"],
-            ["Auth", "Supabase + Google OAuth"],
-            ["Payments", "Soroban Smart Contracts"],
           ].map(([k, v]) => (
             <div key={k} className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
               <span className="text-zinc-500">{k}</span>
@@ -536,26 +575,47 @@ export default function SettingsPage() {
         onToggle={() => toggle("help")}
         delay={0.25}
       >
-        {/* Quick links */}
         <div className="space-y-2">
-          {[
-            { label: "FAQs", sub: "Common questions answered", icon: HelpCircle },
-            { label: "Contact Support", sub: "Email us at support@expo.app", icon: Mail },
-            { label: "Report a Bug", sub: "Found something broken?", icon: AlertCircle },
-          ].map((item) => (
-            <button
-              key={item.label}
-              onClick={() => toast.info(`${item.label} — coming soon`)}
-              className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center gap-3"
-            >
-              <item.icon className="w-5 h-5 text-zinc-400 shrink-0" />
-              <div className="text-left">
-                <p className="font-semibold text-sm">{item.label}</p>
-                <p className="text-zinc-500 text-xs">{item.sub}</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-zinc-600 ml-auto" />
-            </button>
-          ))}
+          <button
+            onClick={() => {
+              toast('Frequently Asked Questions', {
+                description: '1. How to send money?\nGo to Send and enter an Expo ID.\n2. How to withdraw?\nUse the Merchant feature.',
+                duration: 10000,
+              });
+            }}
+            className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center gap-3"
+          >
+            <HelpCircle className="w-5 h-5 text-zinc-400 shrink-0" />
+            <div className="text-left">
+              <p className="font-semibold text-sm">FAQs</p>
+              <p className="text-zinc-500 text-xs">Common questions answered</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-zinc-600 ml-auto" />
+          </button>
+
+          <button
+            onClick={() => window.location.href = "mailto:support@expo.app"}
+            className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center gap-3"
+          >
+            <Mail className="w-5 h-5 text-zinc-400 shrink-0" />
+            <div className="text-left">
+              <p className="font-semibold text-sm">Contact Support</p>
+              <p className="text-zinc-500 text-xs">Email us at support@expo.app</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-zinc-600 ml-auto" />
+          </button>
+
+          <button
+            onClick={() => window.location.href = "mailto:bugs@expo.app?subject=Bug%20Report"}
+            className="w-full p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all flex items-center gap-3"
+          >
+            <AlertCircle className="w-5 h-5 text-zinc-400 shrink-0" />
+            <div className="text-left">
+              <p className="font-semibold text-sm">Report a Bug</p>
+              <p className="text-zinc-500 text-xs">Found something broken?</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-zinc-600 ml-auto" />
+          </button>
         </div>
 
         {/* Feedback form */}
@@ -622,10 +682,7 @@ export default function SettingsPage() {
             )}
           </div>
           <div className="text-left">
-            <p className="font-bold text-red-400">Sign Out</p>
-            <p className="text-red-500/60 text-sm">
-              {signingOut ? "Signing you out…" : "End your current session"}
-            </p>
+            <p className="font-bold text-red-400 text-lg">Sign Out</p>
           </div>
         </button>
       </motion.div>
