@@ -8,7 +8,7 @@ import { Resend } from 'resend';
 import { supabaseAdmin } from '@/lib/supabase';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = 'ExpoPay <noreply@exporouter.site>';
+const FROM = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 const DOMAIN = 'https://exporouter.site';
 
 // ─── Shared HTML shell ────────────────────────────────────────────────────────
