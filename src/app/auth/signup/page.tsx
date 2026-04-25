@@ -43,13 +43,16 @@ export default function SignupPage() {
     setLoading(true);
     setError("");
 
-    const { error: signupError } = await supabase.auth.signUp({
+    const { data, error: signupError } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (signupError) {
       setError(signupError.message);
+      setLoading(false);
+    } else if (data.user?.identities?.length === 0) {
+      setError("This email is already registered. Please sign in instead.");
       setLoading(false);
     } else {
       // Store the password temporarily in sessionStorage so we can log them in if needed,
