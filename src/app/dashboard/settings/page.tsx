@@ -119,6 +119,7 @@ function Toggle({
       />
     </button>
   );
+}
 
 /* ─── Row inside a section ───────────────────────────────────────── */
 function Row({
