@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { createEscrow } from '@/lib/escrow';
+import { createEscrow, getCurrentLedger, calculateDeadlineLedger } from '@/lib/escrow';
 import { notifyEscrow } from '@/lib/notify';
 
 export async function POST(request: Request) {
@@ -50,33 +50,25 @@ export async function POST(request: Request) {
   try {
     const expiryDays = expiry_days || 30;
     const amountInStroops = BigInt(Math.floor(parseFloat(amount) * 10000000));
-    
-    // Generate a unique string ID for the escrow contract
-    const escrowId = Date.now().toString();
 
-    // Fetch default arbiter (admin)
-    const { data: adminProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('stellar_address')
-      .eq('email', 'bkbhaia@gmail.com')
-      .single();
+    // Compute absolute deadline ledger: current ledger + offset
+    // (~5s per ledger, 17280 ledgers/day)
+    const currentLedger = await getCurrentLedger();
+    const deadlineLedger = BigInt(currentLedger) + calculateDeadlineLedger(expiryDays);
 
-    const arbiterAddress = adminProfile?.stellar_address || payerProfile.stellar_address; // Fallback to payer if no admin
-
-    const { txHash } = await createEscrow(
+    // Contract ABI: create(buyer, seller, token, amount, deadline) → returns u64 escrowId
+    const { txHash, escrowId } = await createEscrow(
       payerProfile.stellar_secret,
       payerProfile.stellar_address,
       freelancerProfile.stellar_address,
       amountInStroops,
-      'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC', // EXPO Token
-      arbiterAddress,
-      escrowId
+      deadlineLedger
     );
 
     const { data: contract, error } = await supabaseAdmin
       .from('contracts')
       .insert({
-        escrow_id: escrowId,
+        escrow_id: escrowId.toString(),
         payer_id: payerProfile.id,
         freelancer_id: freelancerProfile.id,
         payer_universal_id: payerProfile.universal_id,
@@ -117,7 +109,7 @@ export async function POST(request: Request) {
       contract,
       tx_hash: txHash,
       escrow_id: escrowId,
-      message: `Contract created and funded on-chain. Escrow ID: ${escrowId}`
+      message: `Contract created on-chain. Escrow ID: ${escrowId}`
     });
   } catch (error: any) {
     console.error('Contract creation error:', error);
