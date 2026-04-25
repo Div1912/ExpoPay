@@ -131,7 +131,7 @@ function LoginInner() {
                   Password
                 </label>
                 <Link
-                  href="#"
+                  href="/auth/forgot-password"
                   className="text-[10px] sm:text-xs font-medium text-white/40 hover:text-[#C694F9] transition-colors"
                 >
                   Forgot?
