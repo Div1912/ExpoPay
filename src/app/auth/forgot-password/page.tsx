@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
               transition={{ duration: 0.8, delay: 0.3 }}
               className="text-white/50 text-sm sm:text-base"
             >
-              Enter your email and we'll send you a 6-digit code to reset your password.
+              Enter your email and we'll send you a verification code to reset your password.
             </motion.p>
           </div>
 

@@ -19,8 +19,8 @@ function VerifyResetOtpInner() {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length !== 6) {
-      setError("Please enter the 6-digit code");
+    if (otp.length < 6) {
+      setError("Please enter the verification code");
       return;
     }
 
@@ -63,19 +63,19 @@ function VerifyResetOtpInner() {
               Verify Reset Code
             </motion.h1>
             <p className="text-white/50 text-sm sm:text-base">
-              We sent a 6-digit code to <span className="text-white font-bold">{email}</span>
+              We sent a verification code to <span className="text-white font-bold">{email}</span>
             </p>
           </div>
 
           <form onSubmit={handleVerify} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-[10px] sm:text-xs font-medium text-white/40 ml-1 uppercase tracking-wider">
-                6-Digit Code
+                Verification Code
               </label>
               <Input
                 type="text"
                 inputMode="numeric"
-                maxLength={6}
+                maxLength={8}
                 placeholder="000000"
                 className="w-full h-12 sm:h-14 bg-white/[0.03] border border-white/[0.08] rounded-xl sm:rounded-2xl px-4 sm:px-5 text-white text-center text-2xl tracking-[0.5em] font-bold focus:border-[#C694F9]/40 focus:bg-white/[0.05] transition-all duration-300"
                 value={otp}
@@ -92,7 +92,7 @@ function VerifyResetOtpInner() {
 
             <button
               type="submit"
-              disabled={loading || otp.length !== 6}
+              disabled={loading || otp.length < 6}
               className="group relative w-full h-12 sm:h-14 mt-4 bg-white text-black font-black text-sm sm:text-base rounded-xl sm:rounded-2xl overflow-hidden transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 to-white opacity-0 group-hover:opacity-100 transition-opacity" />
