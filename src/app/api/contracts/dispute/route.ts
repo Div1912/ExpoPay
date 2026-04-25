@@ -72,7 +72,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const txHash = await disputeEscrow(contract.escrow_id, signerProfile.stellar_secret);
+    const txHash = await disputeEscrow(contract.escrow_id.toString(), signerProfile.stellar_secret);
 
     const { error: updateError } = await supabaseAdmin
       .from('contracts')

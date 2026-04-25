@@ -41,27 +41,22 @@ export async function POST(request: Request) {
     const payFreelancer = resolution === 'pay_freelancer';
     const newStatus = payFreelancer ? 'released' : 'refunded';
     
-    // CRITICAL FIX: To force resolution on-chain for the old smart contract,
-    // we must sign the transaction using the Payer's secret.
-    // The Admin backend retrieves the Payer's secret to execute the Arbiter's decision.
-    const { data: payerProfile } = await supabaseAdmin
+    const { data: adminProfile } = await supabaseAdmin
       .from('profiles')
       .select('stellar_secret')
-      .eq('id', contract.payer_id)
+      .eq('id', user.id)
       .single();
 
-    if (!payerProfile?.stellar_secret) {
-      return NextResponse.json({ error: "Payer's wallet not found. Cannot resolve on-chain." }, { status: 500 });
+    if (!adminProfile?.stellar_secret) {
+      return NextResponse.json({ error: "Arbiter wallet not found. Cannot resolve on-chain." }, { status: 500 });
     }
 
-    let txHash: string;
-    if (payFreelancer) {
-      const { releaseEscrow } = await import('@/lib/escrow');
-      txHash = await releaseEscrow(contract.escrow_id, payerProfile.stellar_secret);
-    } else {
-      const { refundEscrow } = await import('@/lib/escrow');
-      txHash = await refundEscrow(contract.escrow_id, payerProfile.stellar_secret);
-    }
+    const { resolveEscrow } = await import('@/lib/escrow');
+    txHash = await resolveEscrow(
+      contract.escrow_id.toString(), 
+      adminProfile.stellar_secret, 
+      payFreelancer
+    );
 
     await supabaseAdmin
       .from('contracts')

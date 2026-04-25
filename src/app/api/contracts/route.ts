@@ -50,15 +50,26 @@ export async function POST(request: Request) {
     const expiryDays = expiry_days || 30;
     const amountInStroops = BigInt(Math.floor(parseFloat(amount) * 10000000));
     
-    const currentLedger = await getCurrentLedger();
-    const deadlineLedger = BigInt(currentLedger) + calculateDeadlineLedger(expiryDays);
+    // Generate a unique string ID for the escrow contract
+    const escrowId = Date.now().toString();
 
-    const { txHash, escrowId } = await createEscrow(
+    // Fetch default arbiter (admin)
+    const { data: adminProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('stellar_address')
+      .eq('email', 'bkbhaia@gmail.com')
+      .single();
+
+    const arbiterAddress = adminProfile?.stellar_address || payerProfile.stellar_address; // Fallback to payer if no admin
+
+    const { txHash } = await createEscrow(
       payerProfile.stellar_secret,
       payerProfile.stellar_address,
       freelancerProfile.stellar_address,
       amountInStroops,
-      deadlineLedger
+      'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC', // EXPO Token
+      arbiterAddress,
+      escrowId
     );
 
     const { data: contract, error } = await supabaseAdmin
