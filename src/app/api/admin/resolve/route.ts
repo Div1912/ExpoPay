@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
     const { resolveEscrow } = await import('@/lib/escrow');
     const txHash = await resolveEscrow(
-      Number(contract.escrow_id),
+      String(contract.escrow_id),
       adminProfile.stellar_secret,
       payFreelancer
     );

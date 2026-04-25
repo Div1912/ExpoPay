@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { createEscrow, getCurrentLedger, calculateDeadlineLedger } from '@/lib/escrow';
+import { createEscrow } from '@/lib/escrow';
 import { notifyEscrow } from '@/lib/notify';
 
 export async function POST(request: Request) {
@@ -51,17 +51,16 @@ export async function POST(request: Request) {
     const expiryDays = expiry_days || 30;
     const amountInStroops = BigInt(Math.floor(parseFloat(amount) * 10000000));
 
-    // Compute absolute deadline: currentLedger + (days * 17280 ledgers/day)
-    const currentLedger = await getCurrentLedger();
-    const deadlineLedger = BigInt(currentLedger) + calculateDeadlineLedger(expiryDays);
+    // Use a unique escrow string ID — we'll use a timestamp-based key, then update with DB id
+    const tempEscrowId = `escrow-${Date.now()}`;
 
-    // Contract returns the auto-generated numeric escrowId
+    // Contract returns tx hash; escrowId is the string we chose
     const { txHash, escrowId } = await createEscrow(
       payerProfile.stellar_secret,
       payerProfile.stellar_address,
       freelancerProfile.stellar_address,
       amountInStroops,
-      deadlineLedger
+      tempEscrowId
     );
 
     const { data: contract, error } = await supabaseAdmin
