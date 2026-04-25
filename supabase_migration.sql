@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   stellar_secret      TEXT,
   app_pin             TEXT,
   preferred_currency  TEXT        DEFAULT 'XLM',
+  avatar_url          TEXT,
   created_at          TIMESTAMPTZ DEFAULT NOW(),
   updated_at          TIMESTAMPTZ DEFAULT NOW()
 );
@@ -27,6 +28,7 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stellar_address TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stellar_secret TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS app_pin TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS preferred_currency TEXT DEFAULT 'XLM';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- Auto-update updated_at

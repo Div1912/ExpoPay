@@ -172,8 +172,8 @@ export default function ProfilePage() {
           
           <div className="relative z-10 space-y-10">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-blue-600/20 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center border border-blue-500/20 shadow-2xl shadow-blue-600/20">
-                <span className="text-3xl sm:text-4xl font-black text-blue-500">{profile?.universal_id?.[0].toUpperCase()}</span>
+              <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 bg-blue-600/20 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center border border-blue-500/20 shadow-2xl shadow-blue-600/20 overflow-hidden bg-cover bg-center" style={{ backgroundImage: profile?.avatar_url ? `url(${profile.avatar_url})` : undefined }}>
+                {!profile?.avatar_url && <span className="text-3xl sm:text-4xl font-black text-blue-500">{profile?.universal_id?.[0].toUpperCase()}</span>}
               </div>
               <div className="space-y-1 min-w-0 w-full">
                 <h3 className="text-2xl sm:text-4xl font-black tracking-tight uppercase leading-none truncate">{profile?.universal_id}@expo</h3>
