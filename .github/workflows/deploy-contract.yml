@@ -1,0 +1,79 @@
+name: Deploy Soroban Escrow Contract
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployer_secret:
+        description: 'Stellar secret key of the deployer account (funded on Testnet)'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Build & Deploy Escrow Contract
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust + wasm32 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            contracts/escrow/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('contracts/escrow/Cargo.lock') }}
+
+      - name: Build contract WASM
+        working-directory: contracts/escrow
+        run: cargo build --target wasm32-unknown-unknown --release
+
+      - name: Install Stellar CLI
+        run: |
+          curl -L https://github.com/stellar/stellar-cli/releases/download/v22.8.1/stellar-cli-22.8.1-x86_64-unknown-linux-gnu.tar.gz | tar xz
+          sudo mv stellar /usr/local/bin/stellar
+          stellar --version
+
+      - name: Add deployer key
+        run: |
+          stellar keys add deployer --secret-key "${{ github.event.inputs.deployer_secret }}"
+
+      - name: Upload WASM to Testnet
+        id: upload
+        run: |
+          WASM_HASH=$(stellar contract upload \
+            --wasm contracts/escrow/target/wasm32-unknown-unknown/release/soroban_escrow_contract.wasm \
+            --source deployer \
+            --network testnet \
+            --fee 1000000)
+          echo "wasm_hash=$WASM_HASH" >> $GITHUB_OUTPUT
+          echo "✅ WASM uploaded: $WASM_HASH"
+
+      - name: Deploy contract to Testnet
+        id: deploy
+        run: |
+          CONTRACT_ID=$(stellar contract deploy \
+            --wasm-hash "${{ steps.upload.outputs.wasm_hash }}" \
+            --source deployer \
+            --network testnet \
+            --fee 1000000)
+          echo "contract_id=$CONTRACT_ID" >> $GITHUB_OUTPUT
+          echo "✅ Contract deployed: $CONTRACT_ID"
+
+      - name: Print new contract ID
+        run: |
+          echo ""
+          echo "============================================"
+          echo "  NEW ESCROW_CONTRACT_ID (copy this!):"
+          echo "  ${{ steps.deploy.outputs.contract_id }}"
+          echo "============================================"
+          echo ""
+          echo "Update your .env and Vercel env vars:"
+          echo "  ESCROW_CONTRACT_ID=${{ steps.deploy.outputs.contract_id }}"
