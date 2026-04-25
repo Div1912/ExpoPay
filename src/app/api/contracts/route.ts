@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { createEscrow, calculateDeadlineLedger, getCurrentLedger } from '@/lib/escrow';
+import { createEscrow } from '@/lib/escrow';
 import { notifyEscrow } from '@/lib/notify';
 
 export async function POST(request: Request) {
@@ -50,7 +50,6 @@ export async function POST(request: Request) {
   try {
     const expiryDays = expiry_days || 30;
     const amountInStroops = BigInt(Math.floor(parseFloat(amount) * 10000000));
-    const deadlineLedger = calculateDeadlineLedger(expiryDays);
     
     // Generate a unique string ID for the escrow contract
     const escrowId = Date.now().toString();
@@ -72,7 +71,7 @@ export async function POST(request: Request) {
       'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC', // EXPO Token
       arbiterAddress,
       escrowId,
-      deadlineLedger
+      expiryDays
     );
 
     const { data: contract, error } = await supabaseAdmin

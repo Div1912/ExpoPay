@@ -78,9 +78,15 @@ export async function createEscrow(
   tokenAddress: string,
   arbiterAddress: string,
   escrowId: string,
-  deadlineLedger: bigint
+  expiryDays: number
 ): Promise<{ txHash: string }> {
   const keypair = StellarSdk.Keypair.fromSecret(buyerSecret);
+
+  // The contract needs an ABSOLUTE ledger number (currentLedger + offset).
+  // Each ledger is ~5 seconds; 17280 ledgers ≈ 1 day.
+  const currentLedger = await getCurrentLedger();
+  const ledgersPerDay = 17280;
+  const deadlineLedger = BigInt(currentLedger + Math.floor(expiryDays * ledgersPerDay));
 
   const args = [
     StellarSdk.nativeToScVal(escrowId, { type: 'string' }),
@@ -237,6 +243,11 @@ export async function getCurrentLedger(): Promise<number> {
   }
 }
 
+/**
+ * @deprecated Use the expiryDays parameter in createEscrow directly.
+ * The contract requires an ABSOLUTE ledger number; this helper only computes
+ * a relative offset and is kept for backward compatibility.
+ */
 export function calculateDeadlineLedger(daysFromNow: number): bigint {
   const ledgersPerDay = 17280;
   return BigInt(Math.floor(daysFromNow * ledgersPerDay));
