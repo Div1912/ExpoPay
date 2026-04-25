@@ -16,10 +16,20 @@ export async function createStellarAccount() {
   const publicKey = keypair.publicKey();
   const secretKey = keypair.secret();
 
-  try {
-    await fetch(`https://friendbot.stellar.org?addr=${publicKey}`);
-  } catch (error) {
-    console.error('Friendbot funding failed:', error);
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      const res = await fetch(`https://friendbot.stellar.org?addr=${publicKey}`);
+      if (res.ok) {
+        break; // Success
+      }
+      const errText = await res.text();
+      console.error(`Friendbot error (${res.status}):`, errText);
+    } catch (error) {
+      console.error('Friendbot network error:', error);
+    }
+    retries--;
+    if (retries > 0) await new Promise(resolve => setTimeout(resolve, 2000));
   }
 
   return { publicKey, secretKey };

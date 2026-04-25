@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   universal_id        TEXT        UNIQUE,
   display_name        TEXT,
   full_name           TEXT,
+  phone_number        TEXT,
   stellar_address     TEXT,
   stellar_secret      TEXT,
   app_pin             TEXT,
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 
 -- Safely add columns just in case the table already existed before this script
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS phone_number TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stellar_address TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stellar_secret TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS app_pin TEXT;

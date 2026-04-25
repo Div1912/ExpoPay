@@ -42,8 +42,7 @@ export async function POST(request: Request) {
         full_name,
         phone_number,
         app_pin,
-        preferred_currency: preferred_currency || 'USDC',
-        onboarding_completed: true
+        preferred_currency: preferred_currency || 'USDC'
       })
       .eq('id', user.id);
 
