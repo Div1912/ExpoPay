@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
-import { Check, Loader2, Shield, ArrowRight, ExternalLink, Sparkles, AlertCircle, User, Phone, Lock, Coins, Globe } from "lucide-react";
+import { Check, Loader2, Shield, ArrowRight, ExternalLink, Sparkles, AlertCircle, User, Phone, Lock, Coins, Globe, Camera } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Logo } from "@/components/Logo";
@@ -48,6 +48,7 @@ export default function OnboardingPage() {
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [pin, setPin] = useState("");
   const [currency, setCurrency] = useState("USDC");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(false);
@@ -126,7 +127,8 @@ export default function OnboardingPage() {
               full_name: fullName,
               phone_number: `${countryCode}${phoneNumber}`,
               app_pin: pin,
-              preferred_currency: currency
+              preferred_currency: currency,
+              avatar_url: avatarUrl,
           }),
         });
       const data = await res.json();
@@ -282,6 +284,33 @@ export default function OnboardingPage() {
 
 {step === 1 && (
                 <div className="space-y-6">
+                  {/* Photo Upload */}
+                  <div className="flex flex-col items-center gap-3">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Profile Photo (optional)</label>
+                    <label className="relative cursor-pointer group">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#C694F9] to-[#94A1F9] flex items-center justify-center text-3xl font-black overflow-hidden border-2 border-white/10 group-hover:border-[#C694F9]/50 transition-all">
+                        {avatarUrl
+                          ? <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                          : <span>{fullName?.[0]?.toUpperCase() || <Camera className="w-8 h-8 text-white/60" />}</span>
+                        }
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-zinc-800 border-2 border-black rounded-full flex items-center justify-center">
+                        <Camera className="w-3.5 h-3.5 text-white/70" />
+                      </div>
+                      <input type="file" className="hidden" accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          if (file.size > 2 * 1024 * 1024) { alert("Image must be under 2MB"); return; }
+                          const reader = new FileReader();
+                          reader.onload = (ev) => setAvatarUrl(ev.target?.result as string);
+                          reader.readAsDataURL(file);
+                        }}
+                      />
+                    </label>
+                    {avatarUrl && <button onClick={() => setAvatarUrl(null)} className="text-xs text-zinc-500 hover:text-white transition-colors">Remove photo</button>}
+                  </div>
+
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 ml-1">Full Name</label>

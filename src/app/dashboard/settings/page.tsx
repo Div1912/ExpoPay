@@ -387,20 +387,32 @@ export default function SettingsPage() {
                 accept="image/*"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-                        loading: 'Uploading photo...',
-                        success: () => {
-                          setProfile(p => p ? { ...p, avatar_url: event.target?.result as string } : p);
-                          return 'Profile photo updated!';
-                        },
-                        error: 'Failed to upload photo'
+                  if (!file) return;
+                  if (file.size > 2 * 1024 * 1024) { toast.error("Image must be under 2MB"); return; }
+                  const reader = new FileReader();
+                  reader.onload = async (event) => {
+                    const dataUrl = event.target?.result as string;
+                    toast.loading('Uploading photo...');
+                    try {
+                      const res = await fetch("/api/expo/profile", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ avatar_url: dataUrl }),
                       });
-                    };
-                    reader.readAsDataURL(file);
-                  }
+                      if (res.ok) {
+                        setProfile((p: any) => p ? { ...p, avatar_url: dataUrl } : p);
+                        toast.dismiss();
+                        toast.success('Profile photo updated!');
+                      } else {
+                        toast.dismiss();
+                        toast.error('Failed to upload photo');
+                      }
+                    } catch {
+                      toast.dismiss();
+                      toast.error('Failed to upload photo');
+                    }
+                  };
+                  reader.readAsDataURL(file);
                 }}
               />
             </label>

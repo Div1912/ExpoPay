@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'All fields are mandatory' }, { status: 400 });
   }
 
-  // Double check availability
+  // Check username availability
   const { data: existing } = await supabaseAdmin
     .from('profiles')
     .select('universal_id')
@@ -23,6 +23,17 @@ export async function POST(request: Request) {
 
   if (existing) {
     return NextResponse.json({ error: 'Username already taken' }, { status: 400 });
+  }
+
+  // Check phone number uniqueness
+  const { data: phoneExists } = await supabaseAdmin
+    .from('profiles')
+    .select('id')
+    .eq('phone_number', phone_number)
+    .maybeSingle();
+
+  if (phoneExists) {
+    return NextResponse.json({ error: 'An account with this phone number already exists' }, { status: 400 });
   }
 
   try {
