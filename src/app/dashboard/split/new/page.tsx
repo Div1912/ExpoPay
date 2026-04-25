@@ -98,18 +98,27 @@ export default function NewSplitPage() {
   const handleStep2 = () => {
     const valid = participants.every(p => p.universal_id.trim());
     if (!valid || participants.length === 0) { setError("Add at least one participant with a valid @expo ID"); return; }
+    // Always compute equal split here so step 3 review shows correct amounts
     if (splitType === "equal") distributeEqually();
     setError(""); setStep(3);
   };
 
   const handleSubmit = async () => {
     setLoading(true); setError("");
-    const totalOwed = participants.reduce((s, p) => s + parseFloat(p.amount_owed || "0"), 0);
+
     const total = parseFloat(totalAmount);
+
+    // Re-compute the final amounts to avoid async state race with setParticipants
+    const finalParticipants = splitType === "equal"
+      ? participants.map(p => ({ ...p, amount_owed: (total / participants.length).toFixed(7) }))
+      : participants;
+
+    const totalOwed = finalParticipants.reduce((s, p) => s + parseFloat(p.amount_owed || "0"), 0);
     if (Math.abs(totalOwed - total) > 0.01) {
       setError(`Amounts don't add up. Total owed: ${totalOwed.toFixed(2)}, Bill total: ${total}`);
       setLoading(false); return;
     }
+
     try {
       const res = await fetch("/api/split", {
         method: "POST",
@@ -118,17 +127,21 @@ export default function NewSplitPage() {
           title, note,
           total_amount: total,
           currency,
-          participants: participants.map(p => ({
+          participants: finalParticipants.map(p => ({
             universal_id: p.universal_id.replace("@expo", "").trim(),
             amount_owed:  parseFloat(p.amount_owed),
           })),
         }),
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error || "Failed to create split"); return; }
+      let data: any = {};
+      try { data = await res.json(); } catch {}
+      if (!res.ok) { setError(data.error || `Server error (${res.status})`); return; }
       router.push(`/dashboard/split/${data.split.id}`);
-    } catch { setError("Network error. Try again."); }
-    finally { setLoading(false); }
+    } catch (err: any) {
+      setError(err?.message || "Network error. Check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const perPerson = totalAmount && participants.length > 0
