@@ -1,0 +1,197 @@
+name: Deploy Savings Contracts (Staking + Pool)
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_staking:
+        description: 'Deploy EXPO Staking contract'
+        required: true
+        default: 'true'
+        type: boolean
+      deploy_pool:
+        description: 'Deploy XLM Pool contract'
+        required: true
+        default: 'true'
+        type: boolean
+      network:
+        description: 'Network (testnet / mainnet)'
+        required: true
+        default: 'testnet'
+        type: choice
+        options: [testnet, mainnet]
+
+env:
+  STELLAR_NETWORK: ${{ github.event.inputs.network || 'testnet' }}
+  RPC_URL: ${{ github.event.inputs.network == 'mainnet' && 'https://horizon.stellar.org' || 'https://soroban-testnet.stellar.org' }}
+  NETWORK_PASSPHRASE: ${{ github.event.inputs.network == 'mainnet' && 'Public Global Stellar Network ; September 2015' || 'Test SDF Network ; September 2015' }}
+
+jobs:
+  # ─── Build both contracts ─────────────────────────────────────────────────
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust + wasm target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-savings-${{ hashFiles('contracts/staking/Cargo.toml', 'contracts/pool/Cargo.toml') }}
+
+      - name: Build Staking contract
+        working-directory: contracts/staking
+        run: cargo build --release --target wasm32-unknown-unknown
+
+      - name: Build Pool contract
+        working-directory: contracts/pool
+        run: cargo build --release --target wasm32-unknown-unknown
+
+      - name: Upload WASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: savings-contracts-wasm
+          path: |
+            contracts/staking/target/wasm32-unknown-unknown/release/soroban_staking_contract.wasm
+            contracts/pool/target/wasm32-unknown-unknown/release/soroban_pool_contract.wasm
+          retention-days: 1
+
+  # ─── Deploy Staking contract ──────────────────────────────────────────────
+  deploy-staking:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.event.inputs.deploy_staking != 'false' }}
+    outputs:
+      staking_contract_id: ${{ steps.deploy.outputs.staking_contract_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download WASM
+        uses: actions/download-artifact@v4
+        with:
+          name: savings-contracts-wasm
+          path: wasm/
+
+      - name: Install Stellar CLI
+        run: |
+          curl -sSL https://raw.githubusercontent.com/stellar/stellar-cli/main/install.sh | bash
+          echo "$HOME/.stellar/bin" >> $GITHUB_PATH
+
+      - name: Configure network
+        run: |
+          stellar network add ${{ env.STELLAR_NETWORK }} \
+            --rpc-url ${{ env.RPC_URL }} \
+            --network-passphrase "${{ env.NETWORK_PASSPHRASE }}"
+
+      - name: Import deployer identity
+        env:
+          DEPLOYER_SECRET: ${{ secrets.STELLAR_DEPLOYER_SECRET }}
+        run: |
+          echo "$DEPLOYER_SECRET" | stellar keys add deployer --secret-key
+
+      - name: Deploy & Initialize Staking contract
+        id: deploy
+        env:
+          EXPO_TOKEN_ID: ${{ secrets.EXPO_TOKEN_ID }}
+          ADMIN_ADDRESS: ${{ secrets.STELLAR_ADMIN_ADDRESS }}
+        run: |
+          WASM_PATH="wasm/contracts/staking/target/wasm32-unknown-unknown/release/soroban_staking_contract.wasm"
+
+          CONTRACT_ID=$(stellar contract deploy \
+            --wasm "$WASM_PATH" \
+            --source deployer \
+            --network ${{ env.STELLAR_NETWORK }})
+
+          echo "✅ Staking Contract ID: $CONTRACT_ID"
+          echo "staking_contract_id=$CONTRACT_ID" >> $GITHUB_OUTPUT
+
+          stellar contract invoke \
+            --id "$CONTRACT_ID" \
+            --source deployer \
+            --network ${{ env.STELLAR_NETWORK }} \
+            -- initialize \
+            --admin "$ADMIN_ADDRESS" \
+            --expo_token "$EXPO_TOKEN_ID"
+
+          echo "✅ Staking contract initialized"
+
+      - name: Summary
+        run: |
+          echo "## Staking Contract Deployed 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "**Contract ID:** \`${{ steps.deploy.outputs.staking_contract_id }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Network:** ${{ env.STELLAR_NETWORK }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "👉 Set \`STAKING_CONTRACT_ID=${{ steps.deploy.outputs.staking_contract_id }}\` in your .env and Vercel dashboard." >> $GITHUB_STEP_SUMMARY
+
+  # ─── Deploy Pool contract ─────────────────────────────────────────────────
+  deploy-pool:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ github.event.inputs.deploy_pool != 'false' }}
+    outputs:
+      pool_contract_id: ${{ steps.deploy.outputs.pool_contract_id }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download WASM
+        uses: actions/download-artifact@v4
+        with:
+          name: savings-contracts-wasm
+          path: wasm/
+
+      - name: Install Stellar CLI
+        run: |
+          curl -sSL https://raw.githubusercontent.com/stellar/stellar-cli/main/install.sh | bash
+          echo "$HOME/.stellar/bin" >> $GITHUB_PATH
+
+      - name: Configure network
+        run: |
+          stellar network add ${{ env.STELLAR_NETWORK }} \
+            --rpc-url ${{ env.RPC_URL }} \
+            --network-passphrase "${{ env.NETWORK_PASSPHRASE }}"
+
+      - name: Import deployer identity
+        env:
+          DEPLOYER_SECRET: ${{ secrets.STELLAR_DEPLOYER_SECRET }}
+        run: |
+          echo "$DEPLOYER_SECRET" | stellar keys add deployer --secret-key
+
+      - name: Deploy & Initialize Pool contract
+        id: deploy
+        env:
+          EXPO_TOKEN_ID: ${{ secrets.EXPO_TOKEN_ID }}
+          ADMIN_ADDRESS: ${{ secrets.STELLAR_ADMIN_ADDRESS }}
+        run: |
+          WASM_PATH="wasm/contracts/pool/target/wasm32-unknown-unknown/release/soroban_pool_contract.wasm"
+
+          CONTRACT_ID=$(stellar contract deploy \
+            --wasm "$WASM_PATH" \
+            --source deployer \
+            --network ${{ env.STELLAR_NETWORK }})
+
+          echo "✅ Pool Contract ID: $CONTRACT_ID"
+          echo "pool_contract_id=$CONTRACT_ID" >> $GITHUB_OUTPUT
+
+          stellar contract invoke \
+            --id "$CONTRACT_ID" \
+            --source deployer \
+            --network ${{ env.STELLAR_NETWORK }} \
+            -- initialize \
+            --admin "$ADMIN_ADDRESS" \
+            --expo_token "$EXPO_TOKEN_ID"
+
+          echo "✅ Pool contract initialized"
+
+      - name: Summary
+        run: |
+          echo "## Pool Contract Deployed 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "**Contract ID:** \`${{ steps.deploy.outputs.pool_contract_id }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Network:** ${{ env.STELLAR_NETWORK }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "👉 Set \`POOL_CONTRACT_ID=${{ steps.deploy.outputs.pool_contract_id }}\` in your .env and Vercel dashboard." >> $GITHUB_STEP_SUMMARY
