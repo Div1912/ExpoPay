@@ -70,6 +70,11 @@ function VerifyEmailInner() {
           id: data.user.id,
           email: data.user.email,
         });
+        
+        // Fire and forget the welcome email
+        import("@/app/actions/sendWelcomeEmail").then((module) => {
+          module.sendWelcomeEmail(email);
+        }).catch(console.error);
       }
       router.push("/onboarding");
     }
