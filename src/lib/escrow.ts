@@ -77,17 +77,12 @@ export async function createEscrow(
   amount: bigint,
   tokenAddress: string,
   arbiterAddress: string,
-  escrowId: string,
-  expiryDays: number
+  escrowId: string
 ): Promise<{ txHash: string }> {
   const keypair = StellarSdk.Keypair.fromSecret(buyerSecret);
 
-  // The contract needs an ABSOLUTE ledger number (currentLedger + offset).
-  // Each ledger is ~5 seconds; 17280 ledgers ≈ 1 day.
-  const currentLedger = await getCurrentLedger();
-  const ledgersPerDay = 17280;
-  const deadlineLedger = BigInt(currentLedger + Math.floor(expiryDays * ledgersPerDay));
-
+  // Contract ABI: create(escrow_id, client, freelancer, amount, token_id, arbiter)
+  // The on-chain Escrow struct has no deadline field — do NOT pass a 7th arg.
   const args = [
     StellarSdk.nativeToScVal(escrowId, { type: 'string' }),
     new StellarSdk.Address(buyerAddress).toScVal(),
@@ -95,7 +90,6 @@ export async function createEscrow(
     StellarSdk.nativeToScVal(amount, { type: 'i128' }),
     new StellarSdk.Address(tokenAddress).toScVal(),
     new StellarSdk.Address(arbiterAddress).toScVal(),
-    StellarSdk.nativeToScVal(deadlineLedger, { type: 'u64' }),
   ];
 
   const tx = await buildAndPrepareTransaction(buyerAddress, 'create', args);
@@ -103,6 +97,7 @@ export async function createEscrow(
   
   return { txHash: hash };
 }
+
 
 export async function fundEscrow(escrowId: string, buyerSecret: string): Promise<string> {
   const keypair = StellarSdk.Keypair.fromSecret(buyerSecret);

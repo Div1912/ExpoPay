@@ -70,8 +70,7 @@ export async function POST(request: Request) {
       amountInStroops,
       'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC', // EXPO Token
       arbiterAddress,
-      escrowId,
-      expiryDays
+      escrowId
     );
 
     const { data: contract, error } = await supabaseAdmin
