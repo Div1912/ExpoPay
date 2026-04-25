@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { createEscrow, getCurrentLedger, calculateDeadlineLedger } from '@/lib/escrow';
+import { createEscrow } from '@/lib/escrow';
 import { notifyEscrow } from '@/lib/notify';
 
 export async function POST(request: Request) {
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { 
+  const {
     freelancer_username,
     amount,
     title,
@@ -51,24 +51,33 @@ export async function POST(request: Request) {
     const expiryDays = expiry_days || 30;
     const amountInStroops = BigInt(Math.floor(parseFloat(amount) * 10000000));
 
-    // Compute absolute deadline ledger: current ledger + offset
-    // (~5s per ledger, 17280 ledgers/day)
-    const currentLedger = await getCurrentLedger();
-    const deadlineLedger = BigInt(currentLedger) + calculateDeadlineLedger(expiryDays);
+    // Generate a unique string ID for the escrow contract
+    const escrowId = Date.now().toString();
 
-    // Contract ABI: create(buyer, seller, token, amount, deadline) → returns u64 escrowId
-    const { txHash, escrowId } = await createEscrow(
+    // Fetch default arbiter (admin)
+    const { data: adminProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('stellar_address')
+      .eq('email', 'bkbhaia@gmail.com')
+      .single();
+
+    const arbiterAddress = adminProfile?.stellar_address || payerProfile.stellar_address;
+
+    // Contract ABI: create(escrow_id, client, freelancer, amount, token_id, arbiter)
+    const { txHash } = await createEscrow(
       payerProfile.stellar_secret,
       payerProfile.stellar_address,
       freelancerProfile.stellar_address,
       amountInStroops,
-      deadlineLedger
+      'CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC',
+      arbiterAddress,
+      escrowId
     );
 
     const { data: contract, error } = await supabaseAdmin
       .from('contracts')
       .insert({
-        escrow_id: escrowId.toString(),
+        escrow_id: escrowId,
         payer_id: payerProfile.id,
         freelancer_id: freelancerProfile.id,
         payer_universal_id: payerProfile.universal_id,
@@ -104,12 +113,12 @@ export async function POST(request: Request) {
       notifyParties: 'freelancer',
     }).catch(console.error);
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       contract,
       tx_hash: txHash,
       escrow_id: escrowId,
-      message: `Contract created on-chain. Escrow ID: ${escrowId}`
+      message: `Contract created and funded on-chain. Escrow ID: ${escrowId}`
     });
   } catch (error: any) {
     console.error('Contract creation error:', error);
