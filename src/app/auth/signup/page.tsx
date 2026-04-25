@@ -231,16 +231,24 @@ export default function SignupPage() {
                   if (googleError) {
                     setError(googleError.message);
                   } else if (data?.user) {
+                    // Ensure a profile row exists for this Google user
+                    await supabase.from('profiles').upsert({
+                      id: data.user.id,
+                      email: data.user.email,
+                    }, { onConflict: 'id', ignoreDuplicates: true });
+
                     const { data: profile } = await supabase
-                      .from("profiles")
-                      .select("universal_id")
-                      .eq("id", data.user.id)
+                      .from('profiles')
+                      .select('universal_id, stellar_address')
+                      .eq('id', data.user.id)
                       .single();
 
                     if (profile?.universal_id) {
-                      router.push("/dashboard");
+                      // Returning user — go straight to dashboard
+                      router.push('/dashboard');
                     } else {
-                      router.push("/onboarding");
+                      // New user — go to onboarding (Stellar wallet is created there during /api/expo/claim)
+                      router.push('/onboarding');
                     }
                   }
                 }}

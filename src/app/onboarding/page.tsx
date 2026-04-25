@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
@@ -52,6 +52,8 @@ export default function OnboardingPage() {
   
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [checking, setChecking] = useState(false);
+  const [phoneChecking, setPhoneChecking] = useState(false);
+  const [phoneTaken, setPhoneTaken] = useState<boolean | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
@@ -62,6 +64,23 @@ export default function OnboardingPage() {
   const mouseY = useMotionValue(0);
   const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
   const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
+
+  // Issue 1B: Redirect already-onboarded users away from /onboarding immediately
+  useEffect(() => {
+    const checkAlreadyOnboarded = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('universal_id')
+        .eq('id', user.id)
+        .single();
+      if (profile?.universal_id) {
+        router.replace('/dashboard');
+      }
+    };
+    checkAlreadyOnboarded();
+  }, [router]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -74,6 +93,7 @@ export default function OnboardingPage() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [mouseX, mouseY]);
 
+  // Username availability check
   useEffect(() => {
     if (username.length < 3) {
       setIsAvailable(null);
@@ -96,11 +116,35 @@ export default function OnboardingPage() {
     return () => clearTimeout(timer);
   }, [username]);
 
+  // Issue 1A: Real-time phone duplicate check
+  useEffect(() => {
+    if (phoneNumber.length !== 10) {
+      setPhoneTaken(null);
+      return;
+    }
+    const fullPhone = `${countryCode}${phoneNumber}`;
+    const timer = setTimeout(async () => {
+      setPhoneChecking(true);
+      try {
+        const res = await fetch(`/api/expo/check-phone?phone=${encodeURIComponent(fullPhone)}`);
+        const data = await res.json();
+        setPhoneTaken(data.taken);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setPhoneChecking(false);
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [phoneNumber, countryCode]);
+
   const handleNextStep = () => {
     if (step === 0 && (!isAvailable || username.length < 3)) return;
-    if (step === 1 && (!fullName || phoneNumber.length !== 10)) {
-        setError(phoneNumber.length !== 10 ? "Phone number must be exactly 10 digits" : "Please enter your full name");
-        return;
+    if (step === 1) {
+      if (!fullName) { setError("Please enter your full name"); return; }
+      if (phoneNumber.length !== 10) { setError("Phone number must be exactly 10 digits"); return; }
+      if (phoneTaken) { setError("This phone number is already registered to another account"); return; }
+      if (phoneTaken === null && phoneNumber.length === 10) { setError("Checking phone number, please wait..."); return; }
     }
     setError("");
     setStep(step + 1);
@@ -382,15 +426,32 @@ export default function OnboardingPage() {
                           />
                         </div>
                       </div>
-                      <p className="text-[10px] text-white/30 ml-1">
-                        {phoneNumber.length}/10 digits {phoneNumber.length === 10 && <span className="text-green-500">✓</span>}
-                      </p>
+                      <div className="flex items-center gap-2 min-h-[20px] ml-1">
+                        {phoneNumber.length === 10 && (
+                          phoneChecking ? (
+                            <p className="text-[10px] font-bold text-white/40 flex items-center gap-1">
+                              <Loader2 className="w-3 h-3 animate-spin text-[#C694F9]" /> CHECKING...
+                            </p>
+                          ) : phoneTaken === true ? (
+                            <p className="text-[10px] font-bold text-red-500 flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3" /> ALREADY REGISTERED
+                            </p>
+                          ) : phoneTaken === false ? (
+                            <p className="text-[10px] font-bold text-green-500 flex items-center gap-1">
+                              <Check className="w-3 h-3" /> AVAILABLE
+                            </p>
+                          ) : null
+                        )}
+                        {phoneNumber.length > 0 && phoneNumber.length < 10 && (
+                          <p className="text-[10px] text-white/30">{phoneNumber.length}/10 digits</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                   {error && <p className="text-red-400 text-xs font-bold text-center">{error}</p>}
                   <Button 
                     onClick={handleNextStep}
-                    disabled={!fullName || phoneNumber.length !== 10}
+                    disabled={!fullName || phoneNumber.length !== 10 || phoneTaken !== false || phoneChecking}
                     className="w-full h-16 bg-white text-black hover:bg-white/90 text-lg font-black rounded-full transition-all disabled:opacity-50"
                   >
                     CONTINUE <ArrowRight className="ml-2 w-5 h-5" />

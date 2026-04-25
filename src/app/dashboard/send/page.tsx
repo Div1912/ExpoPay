@@ -226,6 +226,7 @@ function SendForm() {
           address: data.address,
           display_name: data.display_name || data.full_name || cleanUsername,
           full_name: data.full_name,
+          avatar_url: data.avatar_url || null,
           preferred_currency: data.preferred_currency || 'USDC',
           verified: true,
         });

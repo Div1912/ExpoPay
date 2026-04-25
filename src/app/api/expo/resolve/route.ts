@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabaseAdmin
     .from('profiles')
-    .select('stellar_address, universal_id, full_name, display_name, preferred_currency, phone_number')
+    .select('stellar_address, universal_id, full_name, display_name, preferred_currency, phone_number, avatar_url')
     .eq('universal_id', username)
     .single();
 
@@ -24,6 +24,7 @@ export async function GET(request: Request) {
     address: data.stellar_address,
     display_name: data.display_name || data.full_name || data.universal_id,
     full_name: data.full_name,
+    avatar_url: data.avatar_url || null,
     preferred_currency: data.preferred_currency || 'USDC',
     verified: !!data.phone_number,
   });
