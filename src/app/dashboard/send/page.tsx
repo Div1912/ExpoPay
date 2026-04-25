@@ -393,7 +393,7 @@ function SendForm() {
             </div>
           )}
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3">
           <a 
             href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
             target="_blank"
@@ -402,7 +402,21 @@ function SendForm() {
           >
             VIEW ON EXPLORER <ExternalLink className="w-4 h-4" />
           </a>
-          <Button onClick={() => router.push("/dashboard")} className="w-full h-16 bg-white text-black hover:bg-zinc-200 text-xl font-black rounded-2xl">
+          <Button
+            onClick={() => {
+              // Reset form state and stay on send page with recipient pre-filled
+              setStatus("idle");
+              setError("");
+              setAmount("");
+              setNote("");
+              setQuote(null);
+              setPaymentResult(null);
+            }}
+            className="w-full h-14 bg-[#C694F9]/15 hover:bg-[#C694F9]/25 border border-[#C694F9]/30 text-[#C694F9] font-black text-base rounded-2xl transition-all"
+          >
+            PAY AGAIN
+          </Button>
+          <Button onClick={() => router.push("/dashboard")} className="w-full h-14 bg-white text-black hover:bg-zinc-200 text-base font-black rounded-2xl">
             RETURN TO OVERVIEW
           </Button>
         </div>

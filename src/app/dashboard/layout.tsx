@@ -7,15 +7,26 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 import { Background } from "@/components/Background";
 import { InactivityGuard } from "@/components/InactivityGuard";
+import { PaymentNotification } from "@/components/PaymentNotification";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ id: string; universal_id: string } | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    // Fetch profile for notification listener
+    fetch("/api/expo/profile")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.id && data?.universal_id) {
+          setCurrentUser({ id: data.id, universal_id: data.universal_id });
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const navItems = [
@@ -40,6 +51,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <InactivityGuard>
     <div className="min-h-screen bg-transparent text-white selection:bg-[#C694F9]/30">
       <Background />
+      {currentUser && (
+        <PaymentNotification
+          currentUserId={currentUser.id}
+          currentUniversalId={currentUser.universal_id}
+        />
+      )}
       
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-72 xl:w-80 bg-black/40 backdrop-blur-3xl border-r border-white/5 flex-col p-6 xl:p-8 z-40">
         <div className="mb-12 xl:mb-16">

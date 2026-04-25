@@ -249,11 +249,19 @@ export default function DashboardPage() {
               <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 sm:gap-8 lg:gap-12">
                 <div className="space-y-3 sm:space-y-4 min-w-0 flex-1">
                     <p className="text-[9px] sm:text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-[#C694F9]">Available Balance</p>
-                    <div className="flex items-baseline gap-2 sm:gap-4 flex-wrap">
-                      <h2 className="text-[clamp(2.5rem,8vw,5rem)] font-black tracking-tight leading-none truncate" style={{ fontFamily: 'var(--font-syne)' }}>
+                    <div className="flex items-baseline gap-2 sm:gap-3 overflow-hidden">
+                      <h2
+                        className="text-[clamp(2.8rem,9vw,5rem)] font-black leading-none"
+                        style={{
+                          fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
+                          fontVariantNumeric: 'tabular-nums lining-nums',
+                          fontFeatureSettings: '"tnum", "lnum"',
+                          letterSpacing: '-0.02em',
+                        }}
+                      >
                         {currencySymbol}{displayBalance}
                       </h2>
-                      <span className="text-lg sm:text-xl md:text-3xl font-black text-white/30 tracking-widest shrink-0">{preferredCurrency}</span>
+                      <span className="text-xl sm:text-2xl md:text-3xl font-black text-white/30 tracking-widest shrink-0">{preferredCurrency}</span>
                     </div>
                     {preferredCurrency !== 'XLM' && (
                       <p className="text-xs text-white/40 font-medium">
