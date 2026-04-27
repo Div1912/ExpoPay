@@ -6,7 +6,7 @@
 
 **Cross-border payments, escrow, group bills, and on-chain savings — all on Stellar.**
 
-ExpoPay turns wallet addresses into human-readable Universal IDs (`alice@expo`), settles payments in seconds via Stellar, lets Indian merchants receive INR via UPI, lets freelancers and clients lock funds in Soroban escrow, lets friends split bills, and lets users earn yield on EXPO and XLM through on-chain staking and a deposit pool.
+ExpoPay turns wallet addresses into human-readable Universal IDs (`alice@expo`), settles payments in seconds via Stellar, lets Indian merchants receive INR via UPI, lets freelancers and clients lock work payments in programmable escrow contracts, and adds social money primitives like split bills and savings vaults.
 
 [**Live demo →**](https://exporouter.site) &nbsp;·&nbsp; ![CI](https://github.com/Div1912/ExpoPay/actions/workflows/ci.yml/badge.svg)
 
@@ -45,8 +45,6 @@ ExpoPay turns wallet addresses into human-readable Universal IDs (`alice@expo`),
 
 ## Feature tour
 
-> 🖼️ The Split and Vault sections have placeholders below. **Drop screenshots into `screenshots/` (or paste GitHub-attached image URLs) and replace the placeholder lines** — paths and alt-text are already in place.
-
 ### 1 · Dashboard overview
 
 The home of the app — wallet balance, recent transactions, quick actions for Send/Scan/Split/Vault.
@@ -83,26 +81,13 @@ Lock funds in a Soroban contract, mark delivered, release on completion. If some
 
 ### 6 · Split bills *(new)*
 
-Create a bill, pick `@expo` participants, choose **Equal** or **Custom shares**, and the app tracks who's paid and who hasn't. Each participant pays from their own balance with a single tap; the creator gets a real-time view of contributions plus email notifications when someone pays.
+Create a bill, pick `@expo` participants, choose **Equal** or **Custom shares**, and the app tracks who's paid and who hasn't. Each participant pays from their own balance with a single tap; the creator sees live settlement status.
 
-<!-- TODO: replace with actual screenshots -->
-> 📷 **Add screenshot:** new-split form (`screenshots/split-new.png`)
->
-> ```
-> ![Create new split](./screenshots/split-new.png)
-> ```
+![Create new split](./screenshots/split-new.png)
 
-> 📷 **Add screenshot:** split detail page with participant list (`screenshots/split-detail.png`)
->
-> ```
-> ![Split detail and tracking](./screenshots/split-detail.png)
-> ```
+![Split detail and tracking](./screenshots/split-detail.png)
 
-> 📷 **Add screenshot:** participant pay-in flow (`screenshots/split-pay.png`)
->
-> ```
-> ![Participant paying their share](./screenshots/split-pay.png)
-> ```
+![Participant paying their share](./screenshots/split-pay.png)
 
 What's under the hood:
 
@@ -116,25 +101,13 @@ Two products in one tab. Live earnings ticker, animated stake progress, and a bu
 
 #### Staking
 
-Lock EXPO for 30, 60, or 90 days for **1.25% / 3.00% / 6.00%** flat reward (≈15 / 18 / 24% APR). Each active stake card shows current value, time remaining, accrued reward (animated 1 Hz), and progress %.
+Lock EXPO for 30, 60, or 90 days for **1.25% / 3.00% / 6.00%** flat reward (≈15 / 18 / 24% APR). Each active stake card shows current value, time remaining, accrued reward (animated 1 Hz), and one-tap claim when unlocked.
 
-> 📷 **Add screenshot:** Vault overview with tier cards (`screenshots/vault-overview.png`)
->
-> ```
-> ![Vault overview with tier cards](./screenshots/vault-overview.png)
-> ```
+![Vault overview with tier cards](./screenshots/vault-overview.png)
 
-> 📷 **Add screenshot:** Active stake card with live counters (`screenshots/vault-active-stake.png`)
->
-> ```
-> ![Active stake with live current value and countdown](./screenshots/vault-active-stake.png)
-> ```
+![Active stake with live current value and countdown](./screenshots/vault-active-stake.png)
 
-> 📷 **Add screenshot:** Stake creation flow (`screenshots/vault-stake-form.png`)
->
-> ```
-> ![Stake amount and lock period selection](./screenshots/vault-stake-form.png)
-> ```
+![Stake amount and lock period selection](./screenshots/vault-stake-form.png)
 
 #### Compound projection (innovation)
 
