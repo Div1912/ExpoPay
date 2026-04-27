@@ -3,6 +3,7 @@ import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendMerchantPayment } from '@/lib/stellar';
 import { simulateUPISettlement } from '@/lib/upi-service';
+import { notifyMerchantPayment } from '@/lib/notify';
 
 export async function POST(request: Request) {
   const user = await getUser();
@@ -96,6 +97,18 @@ export async function POST(request: Request) {
     if (paymentError) {
       console.error('Payment record error:', paymentError);
     }
+
+    // Fire-and-forget email receipt
+    notifyMerchantPayment({
+      userId: user.id,
+      merchantName: merchant_name,
+      merchantUpiId: merchant_upi_id,
+      inrAmount: parseFloat(quote.inr_amount),
+      xlmAmount: parseFloat(quote.xlm_amount),
+      exchangeRate: parseFloat(quote.rate),
+      txHash,
+      paymentId: payment?.id || quote_id,
+    }).catch(console.error);
 
     return NextResponse.json({
       success: true,

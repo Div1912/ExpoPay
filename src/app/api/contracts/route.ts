@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       payerUniversalId: payerProfile.universal_id,
       freelancerUniversalId: freelancerProfile.universal_id,
       txHash,
-      notifyParties: 'freelancer',
+      notifyParties: 'both',
     }).catch(console.error);
 
     return NextResponse.json({ 

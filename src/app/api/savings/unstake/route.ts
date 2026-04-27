@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { unstakeExpo } from '@/lib/savings';
+import { notifyUnstake } from '@/lib/notify';
 
 export async function POST(request: Request) {
   const user = await getUser();
@@ -51,6 +52,16 @@ export async function POST(request: Request) {
       .eq('id', position_id);
 
     const payoutExpo = Number(payout) / 10_000_000;
+
+    // Fire-and-forget unstake confirmation email
+    notifyUnstake({
+      userId: user.id,
+      amountExpo: position.amount_expo,
+      rewardExpo: position.reward_expo,
+      payoutExpo,
+      durationDays: position.duration_days,
+      txHash,
+    }).catch(console.error);
 
     return NextResponse.json({
       success:     true,

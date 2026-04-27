@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { stakeExpo } from '@/lib/savings';
+import { notifyStake } from '@/lib/notify';
 
 export async function POST(request: Request) {
   const user = await getUser();
@@ -54,6 +55,17 @@ export async function POST(request: Request) {
       .single();
 
     if (error) console.error('DB insert error:', error);
+
+    // Fire-and-forget email alert
+    notifyStake({
+      userId: user.id,
+      amountExpo: parseFloat(amount_expo),
+      durationDays: duration_days,
+      rewardExpo,
+      txHash,
+      stakeId,
+      unlocksAt,
+    }).catch(console.error);
 
     return NextResponse.json({
       success:  true,

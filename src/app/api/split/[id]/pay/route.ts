@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import * as StellarSdk from '@stellar/stellar-sdk';
+import { notifySplitPaid } from '@/lib/notify';
 
 const { Server } = StellarSdk.rpc;
 const SOROBAN_RPC_URL = process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
@@ -121,6 +122,17 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
       note: `Split: ${split.title}`,
       purpose: 'Split Payment',
     });
+
+    // Fire-and-forget email alert to creator
+    notifySplitPaid({
+      splitId: split.id,
+      splitTitle: split.title,
+      amount: myEntry.amount_owed,
+      currency: split.currency,
+      payerUniversalId: myEntry.universal_id,
+      creatorId: split.creator_id,
+      isComplete: allPaid,
+    }).catch(console.error);
 
     return NextResponse.json({
       success: true,

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { refundEscrow, releaseEscrow } from '@/lib/escrow';
+import { notifyContractRefund } from '@/lib/notify';
 
 // Auto-release window: freelancer can claim funds this many days after delivery
 // without even needing to dispute — if client never responds.
@@ -125,6 +126,18 @@ An arbiter will review the evidence and decide. Contact support@expopay.app with
 
       if (refundError) throw new Error(`DB Error: ${refundError.message}`);
 
+      // Notify payer of refund
+      notifyContractRefund({
+        contractId: contract_id,
+        contractTitle: contract.title,
+        amount: contract.amount,
+        currency: contract.currency,
+        recipientId: user.id,
+        recipientRole: 'payer',
+        isAutoRelease: false,
+        txHash,
+      }).catch(console.error);
+
       return NextResponse.json({
         success: true,
         tx_hash: txHash,
@@ -174,6 +187,18 @@ An arbiter will review the evidence and decide. Contact support@expopay.app with
             : `Dispute Resolved (Freelancer Claim): ${contract.title}`,
           purpose: 'Contract Release',
         });
+
+      // Notify freelancer of the release/claim
+      notifyContractRefund({
+        contractId: contract_id,
+        contractTitle: contract.title,
+        amount: contract.amount,
+        currency: contract.currency,
+        recipientId: contract.freelancer_id,
+        recipientRole: 'freelancer',
+        isAutoRelease,
+        txHash,
+      }).catch(console.error);
 
       return NextResponse.json({
         success: true,

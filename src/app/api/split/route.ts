@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { notifySplit, notifySplitCreatedSummary } from '@/lib/notify';
 
 // GET /api/split — list splits where user is creator or participant
 export async function GET() {
@@ -121,22 +122,46 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to add participants' }, { status: 500 });
   }
 
-  // Send in-app notifications to all participants
+  // Send in-app notifications AND email alerts to all participants
   for (const profile of participantProfiles) {
     const amountOwed = participants.find(
       (p: any) => p.universal_id.replace('@expo', '').trim() === profile.universal_id
     )?.amount_owed;
 
-    // Insert notification via Supabase (real-time channel)
-    await supabaseAdmin.from('notifications').insert({
+    // Insert in-app notification via Supabase (real-time channel)
+    Promise.resolve(supabaseAdmin.from('notifications').insert({
       user_id: profile.id,
       type: 'split_request',
       title: `Split Request: ${title}`,
       message: `${creatorProfile.universal_id}@expo added you to a split. You owe ${amountOwed} ${currency}.`,
       data: { split_id: split.id },
       read: false,
-    }).catch(() => {}); // non-blocking, ignore if notifications table doesn't exist yet
+    })).catch(() => {}); // non-blocking
+
+    // Fire-and-forget email alert
+    notifySplit({
+      splitId: split.id,
+      splitTitle: title,
+      amount: parseFloat(amountOwed),
+      currency,
+      creatorId: user.id,
+      creatorUniversalId: creatorProfile.universal_id,
+      participantId: profile.id,
+      participantUniversalId: profile.universal_id,
+      totalAmount: parseFloat(total_amount),
+      totalParticipants: participantProfiles.length,
+    }).catch(console.error);
   }
+
+  // Also notify the creator with a summary
+  notifySplitCreatedSummary({
+    splitId: split.id,
+    splitTitle: title,
+    totalAmount: parseFloat(total_amount),
+    currency,
+    creatorId: user.id,
+    participantCount: participantProfiles.length,
+  }).catch(console.error);
 
   return NextResponse.json({ success: true, split });
 }

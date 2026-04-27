@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       payerUniversalId: contract.payer_universal_id,
       freelancerUniversalId: contract.freelancer_universal_id,
       txHash,
-      notifyParties: 'payer',
+      notifyParties: 'both',
     }).catch(console.error);
 
     return NextResponse.json({

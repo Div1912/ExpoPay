@@ -82,12 +82,23 @@ export default function NewSplitPage() {
     setParticipants(updated);
   };
 
+  // Total people = creator (1) + friends. Each gets an equal share.
+  const totalPeople = participants.length + 1;
+
   const distributeEqually = () => {
     const total = parseFloat(totalAmount);
     if (!total || participants.length === 0) return;
-    const share = (total / participants.length).toFixed(7);
+    const share = (total / totalPeople).toFixed(7);
     setParticipants(prev => prev.map(p => ({ ...p, amount_owed: share })));
   };
+
+  // What the creator collects = sum of what friends owe
+  const creatorShare = totalAmount && participants.length > 0
+    ? (parseFloat(totalAmount) / totalPeople).toFixed(2)
+    : '0.00';
+  const friendsTotal = totalAmount && participants.length > 0
+    ? (parseFloat(totalAmount) - parseFloat(totalAmount) / totalPeople).toFixed(2)
+    : '0.00';
 
   const handleStep1 = () => {
     if (!title.trim()) { setError("Please enter a title"); return; }
@@ -97,7 +108,7 @@ export default function NewSplitPage() {
 
   const handleStep2 = () => {
     const valid = participants.every(p => p.universal_id.trim());
-    if (!valid || participants.length === 0) { setError("Add at least one participant with a valid @expo ID"); return; }
+    if (!valid || participants.length === 0) { setError("Add at least one friend with a valid @expo ID"); return; }
     // Always compute equal split here so step 3 review shows correct amounts
     if (splitType === "equal") distributeEqually();
     setError(""); setStep(3);
@@ -107,16 +118,22 @@ export default function NewSplitPage() {
     setLoading(true); setError("");
 
     const total = parseFloat(totalAmount);
+    const numPeople = participants.length + 1; // creator + friends
 
     // Re-compute the final amounts to avoid async state race with setParticipants
     const finalParticipants = splitType === "equal"
-      ? participants.map(p => ({ ...p, amount_owed: (total / participants.length).toFixed(7) }))
+      ? participants.map(p => ({ ...p, amount_owed: (total / numPeople).toFixed(7) }))
       : participants;
 
-    const totalOwed = finalParticipants.reduce((s, p) => s + parseFloat(p.amount_owed || "0"), 0);
-    if (Math.abs(totalOwed - total) > 0.01) {
-      setError(`Amounts don't add up. Total owed: ${totalOwed.toFixed(2)}, Bill total: ${total}`);
-      setLoading(false); return;
+    // For custom splits: friends' amounts + creator's share should equal total
+    const friendsOwed = finalParticipants.reduce((s, p) => s + parseFloat(p.amount_owed || "0"), 0);
+    if (splitType === "custom" && Math.abs(friendsOwed - (total - total / numPeople)) > total * 0.01) {
+      // Soft warning: don't block — friends fill in custom amounts for their portion
+      // Only block if friendsOwed > total (clearly wrong)
+      if (friendsOwed > total + 0.01) {
+        setError(`Friends' amounts (${friendsOwed.toFixed(2)}) exceed the total bill (${total}).`);
+        setLoading(false); return;
+      }
     }
 
     try {
@@ -135,8 +152,10 @@ export default function NewSplitPage() {
       });
       let data: any = {};
       try { data = await res.json(); } catch {}
-      if (!res.ok) { setError(data.error || `Server error (${res.status})`); return; }
-      router.push(`/dashboard/split/${data.split.id}`);
+      if (!res.ok) { setError(data.error || `Server error (${res.status}). Please try again.`); return; }
+      // Navigate to the new split — fallback to splits list if id is missing
+      const splitId = data?.split?.id;
+      router.push(splitId ? `/dashboard/split/${splitId}` : '/dashboard/split');
     } catch (err: any) {
       setError(err?.message || "Network error. Check your connection and try again.");
     } finally {
@@ -145,7 +164,7 @@ export default function NewSplitPage() {
   };
 
   const perPerson = totalAmount && participants.length > 0
-    ? (parseFloat(totalAmount) / participants.length).toFixed(2)
+    ? (parseFloat(totalAmount) / (participants.length + 1)).toFixed(2)
     : "0.00";
 
   const STEPS = ["Bill Details", "Add People", "Review & Send"];
@@ -272,13 +291,20 @@ export default function NewSplitPage() {
 
             {splitType === "equal" && totalAmount && (
               <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between bg-[#C694F9]/5 border border-[#C694F9]/15 rounded-2xl px-5 py-4">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Each person pays</p>
-                  <p className="font-black text-2xl text-[#C694F9] mt-0.5">{perPerson} <span className="text-sm text-white/30">XLM</span></p>
+                className="bg-[#C694F9]/5 border border-[#C694F9]/15 rounded-2xl px-5 py-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Each person pays (incl. you)</p>
+                    <p className="font-black text-2xl text-[#C694F9] mt-0.5">{perPerson} <span className="text-sm text-white/30">XLM</span></p>
+                  </div>
+                  <div className="w-10 h-10 rounded-2xl bg-[#C694F9]/10 border border-[#C694F9]/20 flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-[#C694F9]" />
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-2xl bg-[#C694F9]/10 border border-[#C694F9]/20 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-[#C694F9]" />
+                <div className="flex gap-3 text-[10px] font-black uppercase tracking-wider">
+                  <span className="text-white/40">You pay your own share ({perPerson} XLM)</span>
+                  <span className="text-white/20">·</span>
+                  <span className="text-[#C694F9]/70">You collect {(participants.length > 0 ? (parseFloat(totalAmount) - parseFloat(totalAmount) / (participants.length + 1)) : 0).toFixed(2)} XLM from friends</span>
                 </div>
               </motion.div>
             )}
@@ -400,12 +426,21 @@ export default function NewSplitPage() {
 
               <div className="h-px bg-white/[0.06]" />
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-green-400">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">You collect</span>
+              {/* Creator's own share info */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-white/40">
+                    <span className="text-[10px] font-black uppercase tracking-widest">Your share (pay yourself)</span>
+                  </div>
+                  <span className="font-black text-sm text-white/50">{creatorShare} XLM</span>
                 </div>
-                <span className="font-black text-lg text-green-400">{totalAmount} XLM</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-green-400">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">You collect from friends</span>
+                  </div>
+                  <span className="font-black text-lg text-green-400">{friendsTotal} XLM</span>
+                </div>
               </div>
             </div>
 

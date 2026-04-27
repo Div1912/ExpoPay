@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { depositToPool } from '@/lib/savings';
+import { notifyPoolDeposit } from '@/lib/notify';
 
 export async function POST(request: Request) {
   const user = await getUser();
@@ -43,6 +44,14 @@ export async function POST(request: Request) {
       .single();
 
     if (error) console.error('DB insert error:', error);
+
+    // Fire-and-forget email alert
+    notifyPoolDeposit({
+      userId: user.id,
+      amount: parseFloat(amount_xlm),
+      txHash,
+      positionId: positionId,
+    }).catch(console.error);
 
     return NextResponse.json({
       success:     true,

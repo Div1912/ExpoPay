@@ -311,3 +311,370 @@ export async function notifySecurityEvent(userId: string, eventType: 'new_login'
 
   await sendEmail(email, `${meta.emoji} ExpoPay Security: ${meta.label}`, html);
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SPLIT NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Email to a friend who was added to a split bill */
+export async function notifySplit(opts: {
+  splitId: string;
+  splitTitle: string;
+  amount: number;
+  currency: string;
+  creatorId: string;
+  creatorUniversalId: string;
+  participantId: string;
+  participantUniversalId: string;
+  totalAmount: number;
+  totalParticipants: number;
+}) {
+  const {
+    splitId, splitTitle, amount, currency,
+    creatorUniversalId, participantId, totalAmount, totalParticipants,
+  } = opts;
+
+  const email = await getUserEmail(participantId);
+  if (!email) return;
+
+  const ts = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' });
+
+  const html = emailShell(`
+    <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">🤝 Split Request</p>
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#C694F9;">You've been added to a split!</h2>
+    <p style="color:#71717a;font-size:14px;margin:0 0 20px;">
+      <strong style="color:#e4e4e7;">@${creatorUniversalId}</strong> created a split bill and added you.
+    </p>
+
+    <div style="background:#18181b;border:1px solid #27272a;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+      <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">Split For</p>
+      <p style="margin:0;font-size:18px;font-weight:700;color:#e4e4e7;">${splitTitle}</p>
+    </div>
+
+    <div style="display:inline-block;background:#1c1c1f;border:1px solid #27272a;border-radius:12px;padding:12px 24px;margin:0 0 16px;">
+      <p style="margin:0 0 2px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">Your Share</p>
+      <span style="font-size:28px;font-weight:900;color:#C694F9;">${amount.toFixed(2)} ${currency}</span>
+    </div>
+
+    <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+      ${infoRow('Total Bill', `${totalAmount.toFixed(2)} ${currency}`)}
+      ${infoRow('People', `${totalParticipants + 1} (including creator)`)}
+      ${infoRow('Date', ts + ' UTC')}
+    </table>
+
+    <a href="${DOMAIN}/dashboard/split/${splitId}" style="display:inline-block;background:#C694F9;color:#000;font-size:13px;font-weight:900;padding:10px 24px;border-radius:50px;text-decoration:none;">
+      Pay Your Share →
+    </a>
+  `);
+
+  await sendEmail(email, `💸 You owe ${amount.toFixed(2)} ${currency} — ${splitTitle}`, html);
+}
+
+/** Email to the creator summarizing the split they created */
+export async function notifySplitCreatedSummary(opts: {
+  splitId: string;
+  splitTitle: string;
+  totalAmount: number;
+  currency: string;
+  creatorId: string;
+  participantCount: number;
+}) {
+  const { splitId, splitTitle, totalAmount, currency, creatorId, participantCount } = opts;
+
+  const email = await getUserEmail(creatorId);
+  if (!email) return;
+
+  const html = emailShell(`
+    <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">✅ Split Created</p>
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#fff;">Your split is live!</h2>
+    <p style="color:#71717a;font-size:14px;margin:0 0 20px;">Requests have been sent to all ${participantCount} friend(s).</p>
+
+    <div style="background:#18181b;border:1px solid #27272a;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+      <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">Split</p>
+      <p style="margin:0;font-size:18px;font-weight:700;color:#e4e4e7;">${splitTitle}</p>
+    </div>
+
+    ${amountBadge(totalAmount, currency)}
+
+    <a href="${DOMAIN}/dashboard/split/${splitId}" style="display:inline-block;background:#C694F9;color:#000;font-size:13px;font-weight:900;padding:10px 24px;border-radius:50px;text-decoration:none;margin-top:8px;">
+      Track Payments →
+    </a>
+  `);
+
+  await sendEmail(email, `✅ Split Created — ${splitTitle}`, html);
+}
+
+/** Email to creator when a participant pays their share */
+export async function notifySplitPaid(opts: {
+  splitId: string;
+  splitTitle: string;
+  amount: number;
+  currency: string;
+  payerUniversalId: string;
+  creatorId: string;
+  isComplete: boolean;
+}) {
+  const { splitId, splitTitle, amount, currency, payerUniversalId, creatorId, isComplete } = opts;
+
+  const email = await getUserEmail(creatorId);
+  if (!email) return;
+
+  const html = emailShell(`
+    <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">💰 Payment Received</p>
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#86efac;">@${payerUniversalId} paid their share!</h2>
+    <p style="color:#71717a;font-size:14px;margin:0 0 20px;">for <strong style="color:#e4e4e7;">${splitTitle}</strong></p>
+
+    ${amountBadge(amount, currency, '#86efac')}
+
+    ${isComplete ? `
+    <div style="background:#16a34a20;border:1px solid #16a34a50;border-radius:12px;padding:14px 18px;margin:20px 0;">
+      <p style="margin:0;font-size:14px;font-weight:700;color:#86efac;">🎉 All done! Everyone has paid their share.</p>
+    </div>` : ''}
+
+    <a href="${DOMAIN}/dashboard/split/${splitId}" style="display:inline-block;background:#C694F9;color:#000;font-size:13px;font-weight:900;padding:10px 24px;border-radius:50px;text-decoration:none;">
+      View Split →
+    </a>
+  `);
+
+  await sendEmail(email, `💰 @${payerUniversalId} paid ${amount.toFixed(2)} ${currency} — ${splitTitle}`, html);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SAVINGS / POOL / STAKING NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Email when a user deposits into the XLM Yield Pool */
+export async function notifyPoolDeposit(opts: {
+  userId: string;
+  amount: number;
+  txHash: string;
+  positionId: number;
+}) {
+  const { userId, amount, txHash, positionId } = opts;
+
+  const email = await getUserEmail(userId);
+  if (!email) return;
+
+  const ts = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' });
+
+  const html = emailShell(`
+    <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">🏦 Pool Deposit</p>
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#94A1F9;">Your XLM is earning yield!</h2>
+    <p style="color:#71717a;font-size:14px;margin:0 0 20px;">Your deposit into the EXPO Yield Pool has been confirmed on-chain. Rewards accrue daily.</p>
+
+    ${amountBadge(amount, 'XLM', '#94A1F9')}
+
+    <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+      ${infoRow('Pool', 'EXPO XLM Yield Pool')}
+      ${infoRow('Position ID', `#${positionId}`)}
+      ${infoRow('Tx Hash', txHash.slice(0, 20) + '...')}
+      ${infoRow('Date', ts + ' UTC')}
+    </table>
+
+    <a href="${DOMAIN}/dashboard/savings" style="display:inline-block;background:#94A1F9;color:#000;font-size:13px;font-weight:900;padding:10px 24px;border-radius:50px;text-decoration:none;">
+      View Savings →
+    </a>
+  `);
+
+  await sendEmail(email, `🏦 Pool Deposit Confirmed — ${amount.toFixed(2)} XLM`, html);
+}
+
+/** Email when a user stakes EXPO tokens */
+export async function notifyStake(opts: {
+  userId: string;
+  amountExpo: number;
+  durationDays: number;
+  rewardExpo: number;
+  txHash: string;
+  stakeId: number;
+  unlocksAt: Date;
+}) {
+  const { userId, amountExpo, durationDays, rewardExpo, txHash, stakeId, unlocksAt } = opts;
+
+  const email = await getUserEmail(userId);
+  if (!email) return;
+
+  const ts = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' });
+  const unlockStr = unlocksAt.toLocaleDateString('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
+
+  const html = emailShell(`
+    <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">🔒 Staking Confirmed</p>
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#C694F9;">Your EXPO is staked!</h2>
+    <p style="color:#71717a;font-size:14px;margin:0 0 20px;">Your EXPO tokens are now locked and earning staking rewards.</p>
+
+    ${amountBadge(amountExpo, 'EXPO', '#C694F9')}
+
+    <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+      ${infoRow('Duration', `${durationDays} days`)}
+      ${infoRow('Expected Reward', `${rewardExpo.toFixed(4)} EXPO`)}
+      ${infoRow('Unlocks On', unlockStr)}
+      ${infoRow('Stake ID', `#${stakeId}`)}
+      ${infoRow('Tx Hash', txHash.slice(0, 20) + '...')}
+      ${infoRow('Staked At', ts + ' UTC')}
+    </table>
+
+    <a href="${DOMAIN}/dashboard/savings" style="display:inline-block;background:#C694F9;color:#000;font-size:13px;font-weight:900;padding:10px 24px;border-radius:50px;text-decoration:none;">
+      View Staking →
+    </a>
+  `);
+
+  await sendEmail(email, `🔒 EXPO Staking Confirmed — ${amountExpo.toFixed(2)} EXPO for ${durationDays} days`, html);
+}
+
+/** Email when a user unstakes and receives their principal + reward payout */
+export async function notifyUnstake(opts: {
+  userId: string;
+  amountExpo: number;
+  rewardExpo: number;
+  payoutExpo: number;
+  durationDays: number;
+  txHash: string;
+}) {
+  const { userId, amountExpo, rewardExpo, payoutExpo, durationDays, txHash } = opts;
+
+  const email = await getUserEmail(userId);
+  if (!email) return;
+
+  const ts = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' });
+
+  const html = emailShell(`
+    <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">🔓 Unstake Complete</p>
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#86efac;">Your EXPO has been unstaked!</h2>
+    <p style="color:#71717a;font-size:14px;margin:0 0 20px;">Your staking position is complete and funds have been returned to your wallet.</p>
+
+    <div style="background:#18181b;border:1px solid #27272a;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+      <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+        ${infoRow('Principal Staked', `${amountExpo.toFixed(4)} EXPO`)}
+        ${infoRow('Staking Reward', `+${rewardExpo.toFixed(4)} EXPO`)}
+        ${infoRow('Duration', `${durationDays} days`)}
+      </table>
+    </div>
+
+    <div style="display:inline-block;background:#1c1c1f;border:1px solid #27272a;border-radius:12px;padding:12px 24px;margin:0 0 20px;">
+      <p style="margin:0 0 2px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">Total Payout</p>
+      <span style="font-size:28px;font-weight:900;color:#86efac;">${payoutExpo.toFixed(4)} EXPO</span>
+    </div>
+
+    <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+      ${infoRow('Tx Hash', txHash.slice(0, 20) + '...')}
+      ${infoRow('Date', ts + ' UTC')}
+    </table>
+
+    <a href="${DOMAIN}/dashboard/savings" style="display:inline-block;background:#86efac;color:#000;font-size:13px;font-weight:900;padding:10px 24px;border-radius:50px;text-decoration:none;">
+      View Savings →
+    </a>
+  `);
+
+  await sendEmail(email, `🔓 EXPO Unstaked — ${payoutExpo.toFixed(4)} EXPO returned to your wallet`, html);
+}
+
+/** Email for contract refund (payer gets money back) or freelancer auto-release/claim */
+export async function notifyContractRefund(opts: {
+  contractId: string;
+  contractTitle: string;
+  amount: number;
+  currency: string;
+  recipientId: string;
+  recipientRole: 'payer' | 'freelancer';
+  isAutoRelease: boolean;
+  txHash: string;
+}) {
+  const { contractId, contractTitle, amount, currency, recipientId, recipientRole, isAutoRelease, txHash } = opts;
+
+  const email = await getUserEmail(recipientId);
+  if (!email) return;
+
+  const ts = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' });
+
+  const isPayer = recipientRole === 'payer';
+  const color   = isPayer ? '#94A1F9' : '#86efac';
+  const emoji   = isPayer ? '↩️' : (isAutoRelease ? '⏱️' : '⚖️');
+  const heading = isPayer
+    ? 'Refund Processed'
+    : isAutoRelease ? 'Auto-Release: Funds Claimed' : 'Dispute Resolved — Funds Claimed';
+  const tagline = isPayer
+    ? 'Your refund has been processed and funds returned to your wallet.'
+    : isAutoRelease
+      ? 'The client didn\'t respond within 7 days. Funds have been automatically released to you.'
+      : 'Your dispute was resolved in your favour. Funds have been released to your wallet.';
+
+  const html = emailShell(`
+    <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">${emoji} Contract Update</p>
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:${color};">${heading}</h2>
+    <p style="color:#71717a;font-size:14px;margin:0 0 20px;">${tagline}</p>
+
+    <div style="background:#18181b;border:1px solid #27272a;border-radius:12px;padding:16px 20px;margin-bottom:20px;">
+      <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">Contract</p>
+      <p style="margin:0;font-size:16px;font-weight:700;color:#e4e4e7;">${contractTitle}</p>
+    </div>
+
+    ${amountBadge(amount, currency, color)}
+
+    <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+      ${infoRow('Tx Hash', txHash.slice(0, 20) + '...')}
+      ${infoRow('Date', ts + ' UTC')}
+    </table>
+
+    <a href="${DOMAIN}/dashboard/contracts" style="display:inline-block;background:${color};color:#000;font-size:13px;font-weight:900;padding:10px 24px;border-radius:50px;text-decoration:none;">
+      View Contract →
+    </a>
+  `);
+
+  await sendEmail(email, `${emoji} ${heading} — ${contractTitle}`, html);
+}
+
+/** Email receipt for UPI merchant payment */
+export async function notifyMerchantPayment(opts: {
+  userId: string;
+  merchantName: string;
+  merchantUpiId: string;
+  inrAmount: number;
+  xlmAmount: number;
+  exchangeRate: number;
+  txHash: string;
+  paymentId: string;
+}) {
+  const { userId, merchantName, merchantUpiId, inrAmount, xlmAmount, exchangeRate, txHash, paymentId } = opts;
+
+  const email = await getUserEmail(userId);
+  if (!email) return;
+
+  const ts = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' });
+
+  const html = emailShell(`
+    <p style="margin:0 0 4px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">🛒 Merchant Payment</p>
+    <h2 style="margin:0 0 8px;font-size:22px;font-weight:900;color:#fff;">Payment Sent!</h2>
+    <p style="color:#71717a;font-size:14px;margin:0 0 20px;">
+      Your UPI merchant payment to <strong style="color:#e4e4e7;">${merchantName}</strong> was processed successfully.
+    </p>
+
+    <div style="background:#18181b;border:1px solid #27272a;border-radius:12px;padding:20px;margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <p style="margin:0 0 2px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">INR Amount</p>
+          <p style="margin:0;font-size:24px;font-weight:900;color:#fff;">₹${inrAmount.toFixed(2)}</p>
+        </div>
+        <div style="text-align:right;">
+          <p style="margin:0 0 2px;font-size:11px;color:#52525b;text-transform:uppercase;letter-spacing:.1em;">XLM Spent</p>
+          <p style="margin:0;font-size:24px;font-weight:900;color:#C694F9;">${xlmAmount.toFixed(4)} XLM</p>
+        </div>
+      </div>
+    </div>
+
+    <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;margin:16px 0;">
+      ${infoRow('Merchant', merchantName)}
+      ${infoRow('UPI ID', merchantUpiId)}
+      ${infoRow('Exchange Rate', `1 XLM = ₹${exchangeRate.toFixed(2)}`)}
+      ${infoRow('Payment ID', paymentId.slice(0, 16) + '...')}
+      ${infoRow('Stellar Tx', txHash.slice(0, 20) + '...')}
+      ${infoRow('Date', ts + ' UTC')}
+    </table>
+
+    <a href="${DOMAIN}/dashboard/merchant" style="display:inline-block;background:#C694F9;color:#000;font-size:13px;font-weight:900;padding:10px 24px;border-radius:50px;text-decoration:none;">
+      View Payment History →
+    </a>
+  `);
+
+  await sendEmail(email, `🧾 Payment to ${merchantName} — ₹${inrAmount.toFixed(2)} (${xlmAmount.toFixed(4)} XLM)`, html);
+}
+

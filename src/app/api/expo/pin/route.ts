@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUser } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { notifySecurityEvent } from '@/lib/notify';
 
 export async function POST(request: Request) {
   const user = await getUser();
@@ -36,6 +37,9 @@ export async function POST(request: Request) {
   if (updateError) {
     return NextResponse.json({ error: 'Failed to update PIN' }, { status: 500 });
   }
+
+  // Fire security alert (fire-and-forget)
+  notifySecurityEvent(user.id, 'pin_changed').catch(console.error);
 
   return NextResponse.json({ success: true, message: 'PIN updated successfully' });
 }
