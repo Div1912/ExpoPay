@@ -131,29 +131,78 @@ Every push runs the `ci.yml` workflow: typecheck, lint, build, contract test sui
 
 ## Architecture
 
-```
-┌─────────────────────┐         ┌──────────────────────┐
-│   Next.js 15 App    │ ──────▶ │  /api/* Route        │
-│   (App Router,      │         │   Handlers           │
-│    Framer Motion,   │         │   (server-only)      │
-│    Tailwind 4)      │         └──────────┬───────────┘
-└─────────────────────┘                    │
-       ▲                                   │
-       │                          ┌────────┼────────┐
-       │                          ▼        ▼        ▼
-       │                    ┌──────────┐ ┌──────┐ ┌────────────┐
-       │                    │ Supabase │ │  FX  │ │  Stellar   │
-       │                    │ (PG +    │ │ rates│ │   SDK +    │
-       │                    │  Auth +  │ └──────┘ │  Soroban   │
-       │                    │ Realtime)│          │  contracts │
-       │                    └──────────┘          └─────┬──────┘
-       │                                                │
-       │                                                ▼
-       │                                       ┌──────────────────┐
-       │  Realtime channel (Supabase) ◀──────  │  Stellar Testnet │
-       │  for live transaction & split status  │  (Soroban + base │
-       │                                       │   asset network) │
-       └───────────────────────────────────────┴──────────────────┘
+```mermaid
+graph TD
+    %% Styling
+    classDef frontend fill:#1e1e1e,stroke:#C694F9,stroke-width:2px,color:#fff,border-radius:8px;
+    classDef backend fill:#1e1e1e,stroke:#94A1F9,stroke-width:2px,color:#fff,border-radius:8px;
+    classDef db fill:#1e1e1e,stroke:#4ade80,stroke-width:2px,color:#fff,border-radius:8px;
+    classDef blockchain fill:#1e1e1e,stroke:#facc15,stroke-width:2px,color:#fff,border-radius:8px;
+    classDef external fill:#1e1e1e,stroke:#f87171,stroke-width:2px,color:#fff,border-radius:8px;
+
+    %% Components
+    subgraph Client ["Client Side (Next.js 15 App Router)"]
+        UI["React UI + Tailwind 4<br/>(Framer Motion, GSAP)"]
+    end
+
+    subgraph Server ["Server Side (Next.js API Routes)"]
+        AuthAPI["Auth & Profile API"]
+        PaymentAPI["P2P & Split Bill API"]
+        ContractAPI["Escrow API"]
+        SavingsAPI["Staking & Vault API"]
+        MerchantAPI["Merchant UPI API"]
+    end
+
+    subgraph Infrastructure ["Supabase Platform"]
+        AuthDB["Supabase Auth"]
+        PG["PostgreSQL Database<br/>(Profiles, Txs, Contracts)"]
+        Realtime["Realtime WebSockets"]
+    end
+
+    subgraph Stellar ["Stellar Blockchain (Testnet)"]
+        Horizon["Horizon RPC<br/>(Ledger & Balances)"]
+        Soroban["Soroban Smart Contracts<br/>(Escrow, Pool, Staking)"]
+        Asset["Stellar Assets<br/>(XLM, EXPO, USDC)"]
+    end
+
+    subgraph External ["External Services"]
+        Email["Resend API<br/>(Transactional Emails)"]
+        FX["FX Rates API"]
+        UPI["UPI Resolution"]
+    end
+
+    %% Client Interactions
+    UI <-->|REST/JSON| Server
+    UI <-->|Live Updates| Realtime
+
+    %% Server Interactions with DB
+    AuthAPI <--> AuthDB
+    PaymentAPI <--> PG
+    ContractAPI <--> PG
+    SavingsAPI <--> PG
+    MerchantAPI <--> PG
+
+    %% Server Interactions with Blockchain
+    PaymentAPI <-->|Transaction Builder| Horizon
+    MerchantAPI <-->|Cross-border TX| Horizon
+    ContractAPI <-->|Invoke| Soroban
+    SavingsAPI <-->|Invoke| Soroban
+
+    %% External
+    Server -->|Email Alerts| Email
+    MerchantAPI -->|Live Conversion| FX
+    MerchantAPI -->|Resolve VPA| UPI
+
+    %% Internal Blockchain
+    Horizon <--> Asset
+    Soroban <--> Asset
+
+    %% Apply Styles
+    class UI frontend;
+    class AuthAPI,PaymentAPI,ContractAPI,SavingsAPI,MerchantAPI backend;
+    class AuthDB,PG,Realtime db;
+    class Horizon,Soroban,Asset blockchain;
+    class Email,FX,UPI external;
 ```
 
 ---

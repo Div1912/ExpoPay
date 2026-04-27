@@ -159,13 +159,12 @@ export default function SettingsPage() {
   const [editName, setEditName] = useState("");
   const [savingInfo, setSavingInfo] = useState(false);
 
-  // Phone change OTP flow
-  const [showPhoneModal, setShowPhoneModal] = useState(false);
-  const [newPhone, setNewPhone] = useState("");
-  const [phoneOtp, setPhoneOtp] = useState("");
+  // Email change OTP flow
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [emailOtp, setEmailOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const [generatedOtp, setGeneratedOtp] = useState("");
-  const [savingPhone, setSavingPhone] = useState(false);
+  const [savingEmail, setSavingEmail] = useState(false);
 
   // Notification preferences (persisted to localStorage)
   const [notifPayments, setNotifPayments] = useState(true);
@@ -240,60 +239,59 @@ export default function SettingsPage() {
     }
   };
 
-  const handleSendPhoneOtp = async () => {
-    if (!newPhone || newPhone.length < 8) { toast.error("Enter a valid phone number"); return; }
-    setSavingPhone(true);
+  const handleSendEmailOtp = async () => {
+    if (!newEmail || !newEmail.includes("@")) { toast.error("Enter a valid email address"); return; }
+    if (newEmail.toLowerCase() === profile?.email?.toLowerCase()) { toast.error("Please enter a new email address"); return; }
+    
+    setSavingEmail(true);
     try {
-      // Check uniqueness first
-      const checkRes = await fetch(`/api/expo/check-phone?phone=${encodeURIComponent(newPhone)}`);
-      const checkData = await checkRes.json();
-      if (checkData.taken) { toast.error("This phone number is already registered"); return; }
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+      
+      if (error) {
+        toast.error(error.message || "Failed to send OTP to new email");
+        return;
+      }
 
-      // Generate a 6-digit OTP and email it
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      setGeneratedOtp(otp);
-
-      // Send OTP via Supabase email (use magic link email as a carrier)
-      await supabase.auth.signInWithOtp({
-        email: profile?.email!,
-        options: {
-          shouldCreateUser: false,
-          data: { phone_otp: otp, new_phone: newPhone },
-        },
-      });
-
-      // Also show OTP in a toast for dev fallback
-      toast.success(`OTP sent to ${profile?.email}`);
+      toast.success(`OTP sent to ${newEmail}`);
       setOtpSent(true);
     } catch {
       toast.error("Failed to send OTP");
     } finally {
-      setSavingPhone(false);
+      setSavingEmail(false);
     }
   };
 
-  const handleVerifyPhoneOtp = async () => {
-    if (phoneOtp.length !== 6) { toast.error("Enter the 6-digit OTP"); return; }
-    if (phoneOtp !== generatedOtp) { toast.error("Incorrect OTP. Please try again."); return; }
-    setSavingPhone(true);
+  const handleVerifyEmailOtp = async () => {
+    if (emailOtp.length !== 6) { toast.error("Enter the 6-digit OTP"); return; }
+    
+    setSavingEmail(true);
     try {
-      const res = await fetch("/api/expo/profile", {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: newEmail,
+        token: emailOtp,
+        type: 'email_change'
+      });
+
+      if (error) {
+        toast.error(error.message || "Incorrect OTP. Please try again.");
+        return;
+      }
+
+      // Also update the profile table to keep them in sync
+      await fetch("/api/expo/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone_number: newPhone }),
+        body: JSON.stringify({ email: newEmail }),
       });
-      if (res.ok) {
-        setProfile((p) => p ? { ...p, phone_number: newPhone } : p);
-        toast.success("Phone number updated!");
-        setShowPhoneModal(false);
-        setOtpSent(false); setNewPhone(""); setPhoneOtp(""); setGeneratedOtp("");
-      } else {
-        toast.error("Failed to save phone number");
-      }
+
+      setProfile((p) => p ? { ...p, email: newEmail } : p);
+      toast.success("Email address updated!");
+      setShowEmailModal(false);
+      setOtpSent(false); setNewEmail(""); setEmailOtp("");
     } catch {
-      toast.error("Failed to update phone");
+      toast.error("Failed to update email");
     } finally {
-      setSavingPhone(false);
+      setSavingEmail(false);
     }
   };
 
@@ -412,68 +410,68 @@ export default function SettingsPage() {
         )}
       </AnimatePresence>
 
-      {/* ── Phone Change Modal ── */}
+      {/* ── Email Change Modal ── */}
       <AnimatePresence>
-        {showPhoneModal && (
+        {showEmailModal && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-            onClick={() => { setShowPhoneModal(false); setOtpSent(false); setNewPhone(""); setPhoneOtp(""); }}
+            onClick={() => { setShowEmailModal(false); setOtpSent(false); setNewEmail(""); setEmailOtp(""); }}
           >
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-sm bg-[#111] border border-white/10 rounded-2xl p-6 space-y-4"
             >
               <div className="flex items-center justify-between">
-                <h3 className="font-black text-lg uppercase tracking-tight">Change Phone Number</h3>
-                <button onClick={() => { setShowPhoneModal(false); setOtpSent(false); }} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10">
+                <h3 className="font-black text-lg uppercase tracking-tight">Change Email Address</h3>
+                <button onClick={() => { setShowEmailModal(false); setOtpSent(false); }} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10">
                   <span className="text-white/50 text-lg leading-none">×</span>
                 </button>
               </div>
 
               {!otpSent ? (
                 <>
-                  <p className="text-zinc-500 text-sm">Enter your new phone number. A 6-digit OTP will be sent to your email <span className="text-white font-bold">{profile?.email}</span> to confirm the change.</p>
+                  <p className="text-zinc-500 text-sm">Enter your new email address. A 6-digit OTP will be sent to confirm the change.</p>
                   <Input
-                    type="tel"
-                    inputMode="tel"
-                    value={newPhone}
-                    onChange={(e) => setNewPhone(e.target.value.replace(/[^\d+\s-]/g, ""))}
-                    placeholder="+91 98765 43210"
+                    type="email"
+                    inputMode="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    placeholder="new@example.com"
                     className="bg-white/5 border-white/10 h-12 rounded-xl"
                   />
                   <button
-                    onClick={handleSendPhoneOtp}
-                    disabled={savingPhone}
+                    onClick={handleSendEmailOtp}
+                    disabled={savingEmail}
                     className="w-full h-12 rounded-xl bg-[#C694F9] hover:bg-[#C694F9]/90 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all"
                   >
-                    {savingPhone ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send OTP to Email"}
+                    {savingEmail ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send OTP"}
                   </button>
                 </>
               ) : (
                 <>
                   <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
-                    <p className="text-green-400 text-sm font-semibold">✓ OTP sent to {profile?.email}</p>
+                    <p className="text-green-400 text-sm font-semibold">✓ OTP sent to {newEmail}</p>
                     <p className="text-zinc-500 text-xs mt-1">Check your inbox and enter the 6-digit code below.</p>
                   </div>
                   <Input
                     type="text"
                     inputMode="numeric"
                     maxLength={6}
-                    value={phoneOtp}
-                    onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ""))}
+                    value={emailOtp}
+                    onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, ""))}
                     placeholder="Enter 6-digit OTP"
                     className="bg-white/5 border-white/10 h-12 rounded-xl tracking-[0.5em] text-center text-lg font-bold"
                   />
                   <div className="flex gap-3">
                     <button onClick={() => setOtpSent(false)} className="flex-1 h-11 rounded-xl bg-white/5 border border-white/10 text-sm font-semibold hover:bg-white/10 transition-all">
-                      Resend
+                      Edit Email
                     </button>
                     <button
-                      onClick={handleVerifyPhoneOtp}
-                      disabled={savingPhone}
+                      onClick={handleVerifyEmailOtp}
+                      disabled={savingEmail}
                       className="flex-1 h-11 rounded-xl bg-[#C694F9] hover:bg-[#C694F9]/90 text-black font-bold text-sm flex items-center justify-center gap-2 transition-all"
                     >
-                      {savingPhone ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify & Save"}
+                      {savingEmail ? <Loader2 className="w-4 h-4 animate-spin" /> : "Verify & Save"}
                     </button>
                   </div>
                 </>
@@ -587,33 +585,34 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-1.5">
             <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
-              Phone Number
+              Phone Number (read-only)
+            </label>
+            <Input
+              value={profile?.phone_number || ""}
+              disabled
+              className="bg-white/[0.02] border-white/5 h-12 rounded-xl opacity-50 cursor-not-allowed"
+            />
+            <p className="text-[10px] text-zinc-600 ml-1">Phone number cannot be changed after registration</p>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+              Email
             </label>
             <div className="flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-xl">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-400 shrink-0" />
                 <span className="text-sm font-medium text-white/80">
-                  {profile?.phone_number || "Not set"}
+                  {profile?.email || "Not set"}
                 </span>
               </div>
               <button
-                onClick={() => setShowPhoneModal(true)}
+                onClick={() => setShowEmailModal(true)}
                 className="text-[10px] font-black uppercase tracking-widest text-[#C694F9] hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-[#C694F9]/10"
               >
                 Change
               </button>
             </div>
             <p className="text-[10px] text-zinc-600 ml-1">Verified via email OTP</p>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
-              Email (read-only)
-            </label>
-            <Input
-              value={profile?.email || ""}
-              disabled
-              className="bg-white/[0.02] border-white/5 h-12 rounded-xl opacity-50 cursor-not-allowed"
-            />
           </div>
         </div>
 
