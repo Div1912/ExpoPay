@@ -3,15 +3,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { useRouter } from "next/navigation";
 import { ShieldAlert, LogOut, RefreshCw } from "lucide-react";
 
 const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-const WARNING_BEFORE_MS = 60 * 1000;           // warn 1 min before
+const WARNING_BEFORE_MS     = 60 * 1000;     // warn 1 min before
+const STORAGE_KEY           = "expopay_last_activity";
 
 const ACTIVITY_EVENTS = [
   "mousedown",
-  "mousemove",
   "keydown",
   "scroll",
   "touchstart",
@@ -20,40 +19,60 @@ const ACTIVITY_EVENTS = [
 ] as const;
 
 export function InactivityGuard({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const [showWarning, setShowWarning] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(60);
-  const logoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const logoutTimerRef  = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const warningTimerRef = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const countdownRef    = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Refs mirroring state to avoid stale closures inside event listeners
+  const showWarningRef  = useRef(false);
+  const loggingOutRef   = useRef(false);
 
   const clearAll = useCallback(() => {
-    if (logoutTimerRef.current) clearTimeout(logoutTimerRef.current);
+    if (logoutTimerRef.current)  clearTimeout(logoutTimerRef.current);
     if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
-    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (countdownRef.current)    clearInterval(countdownRef.current);
+    logoutTimerRef.current  = null;
+    warningTimerRef.current = null;
+    countdownRef.current    = null;
+  }, []);
+
+  const updateLastActivity = useCallback(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, Date.now().toString());
+    } catch {
+      // storage may be unavailable in private mode — fail silently
+    }
   }, []);
 
   const doLogout = useCallback(async () => {
+    if (loggingOutRef.current) return;
+    loggingOutRef.current = true;
     clearAll();
-    localStorage.removeItem("expopay_last_activity");
-    await supabase.auth.signOut();
-    router.push("/auth/login?reason=inactivity");
-  }, [clearAll, router]);
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    try { await supabase.auth.signOut(); } catch {}
+    // Hard navigation — avoids racing with any in-flight Next.js <Link> click
+    // which was causing the "tap nav -> sign-in flash -> tap again -> dashboard" bug.
+    window.location.replace("/auth/login?reason=inactivity");
+  }, [clearAll]);
 
-  const resetTimers = useCallback(() => {
+  const startTimers = useCallback(() => {
     clearAll();
     setShowWarning(false);
+    showWarningRef.current = false;
     setSecondsLeft(60);
 
     warningTimerRef.current = setTimeout(() => {
       setShowWarning(true);
+      showWarningRef.current = true;
       setSecondsLeft(60);
 
-      // start countdown
       countdownRef.current = setInterval(() => {
         setSecondsLeft((s) => {
           if (s <= 1) {
-            clearInterval(countdownRef.current!);
+            if (countdownRef.current) clearInterval(countdownRef.current);
             return 0;
           }
           return s - 1;
@@ -65,38 +84,72 @@ export function InactivityGuard({ children }: { children: React.ReactNode }) {
   }, [clearAll, doLogout]);
 
   useEffect(() => {
-    const lastActivity = localStorage.getItem("expopay_last_activity");
-    if (lastActivity && Date.now() - parseInt(lastActivity) > INACTIVITY_TIMEOUT_MS) {
+    // Initial check: if a previous session left a stale activity timestamp
+    // older than the timeout, log out immediately.
+    const lastActivity = (() => {
+      try { return Number(localStorage.getItem(STORAGE_KEY) || 0); } catch { return 0; }
+    })();
+    if (lastActivity && Date.now() - lastActivity > INACTIVITY_TIMEOUT_MS) {
       doLogout();
       return;
     }
 
-    const updateLastActivity = () => {
-      localStorage.setItem("expopay_last_activity", Date.now().toString());
-    };
-
-    resetTimers();
     updateLastActivity();
+    startTimers();
 
     const handleActivity = () => {
       updateLastActivity();
-      if (!showWarning) resetTimers();
+      // Don't restart timers while the warning modal is up — the user must
+      // click "Stay Logged In" or "Sign Out" explicitly.
+      if (!showWarningRef.current) startTimers();
     };
 
     ACTIVITY_EVENTS.forEach((ev) =>
       window.addEventListener(ev, handleActivity, { passive: true })
     );
+
+    // ──────────────────────────────────────────────────────────────────
+    // The mobile-nav bug fix: pause timers while the page is hidden, and
+    // re-evaluate on resume. Browsers happily fire setTimeout callbacks
+    // while the tab is backgrounded on mobile, which used to call
+    // `doLogout()` mid-touch and race with a <Link> click — producing the
+    // "tap → sign-in → tap → dashboard" flicker.
+    // ──────────────────────────────────────────────────────────────────
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        // Suspend timers — we'll decide on resume what to do.
+        clearAll();
+      } else {
+        if (loggingOutRef.current) return;
+        const last = (() => {
+          try { return Number(localStorage.getItem(STORAGE_KEY) || 0); } catch { return 0; }
+        })();
+        const elapsed = last ? Date.now() - last : 0;
+
+        if (last && elapsed > INACTIVITY_TIMEOUT_MS) {
+          doLogout();
+          return;
+        }
+        // Treat tab-resume as activity and restart timers cleanly.
+        updateLastActivity();
+        startTimers();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
       clearAll();
       ACTIVITY_EVENTS.forEach((ev) =>
         window.removeEventListener(ev, handleActivity)
       );
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleStayLoggedIn = () => {
-    resetTimers();
+    updateLastActivity();
+    startTimers();
   };
 
   return (
