@@ -21,12 +21,10 @@ ExpoPay turns wallet addresses into human-readable Universal IDs (`alice@expo`),
 3. [Architecture](#architecture)
 4. [Smart contracts](#smart-contracts-soroban)
 5. [API reference](#api-reference)
-6. [Database schema](#database-schema)
-7. [Environment variables](#environment-variables)
-8. [Getting started](#getting-started)
-9. [Project structure](#project-structure)
-10. [Security notes](#security-notes)
-11. [Roadmap](#roadmap)
+6. [Getting started](#getting-started)
+7. [Project structure](#project-structure)
+8. [Security notes](#security-notes)
+9. [Roadmap](#roadmap)
 
 ---
 
