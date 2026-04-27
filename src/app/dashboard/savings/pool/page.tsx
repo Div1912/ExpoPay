@@ -88,7 +88,7 @@ export default function PoolDepositPage() {
       <section className="bg-white/[0.03] border border-white/[0.08] rounded-3xl p-5 space-y-4">
         <p className="text-[10px] font-black uppercase tracking-widest text-white/30">How It Works</p>
         {[
-          { icon: "1️⃣", text: "Deposit any amount of XLM — no minimum, no lock-up." },
+          { icon: "1️⃣", text: "Deposit any amount of XLM — no minimum, no lock up." },
           { icon: "2️⃣", text: "Your XLM earns EXPO token rewards every day (~0.5%/day)." },
           { icon: "3️⃣", text: "Withdraw anytime — get your XLM back + all accrued EXPO." },
         ].map((step, i) => (
