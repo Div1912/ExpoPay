@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { ShieldAlert, LogOut, RefreshCw } from "lucide-react";
 
-const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
 const WARNING_BEFORE_MS     = 60 * 1000;     // warn 1 min before
 const STORAGE_KEY           = "expopay_last_activity";
 
