@@ -10,6 +10,7 @@ ExpoPay turns wallet addresses into human-readable Universal IDs (`alice@expo`),
 
 [**Live demo →**](https://exporouter.site) &nbsp;·&nbsp; ![CI](https://github.com/Div1912/ExpoPay/actions/workflows/ci.yml/badge.svg)
 
+[**MVP Video →**](https://youtu.be/nHyg3oPxe0Q)
 
 [**User feedbacks →**](https://docs.google.com/spreadsheets/d/e/2PACX-1vR82azl8byhjpi6hAnn8naPIsU5H-I_TGDyDFqdP2jv7xJXpp5O1MSdHBfHmFYH0v7Bka2FSSyrEbS2/pubhtml)
 
@@ -79,6 +80,10 @@ Every payment, escrow action, split contribution, and vault event in one place �
 Lock funds in a Soroban contract, mark delivered, release on completion. If something goes wrong, either party can dispute and an arbiter resolves it on-chain.
 
 <img width="1200" alt="Escrow contract dashboard" src="./screenshots/contract.png" />
+
+**ARBITER CONSOLE** - For solving Dispute between two contracted Parties.
+
+<img width="1200" alt="Escrow contract dashboard" src="./screenshots/Arbiter.png" />
 
 ### 6 · Split bills *(new)*
 
