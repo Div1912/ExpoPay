@@ -8,9 +8,11 @@
 
 ExpoPay turns wallet addresses into human-readable Universal IDs (`alice@expo`), settles payments in seconds via Stellar, lets Indian merchants receive INR via UPI, lets freelancers and clients lock milestone funds in a Soroban contract, splits group bills automatically, and provides an on-chain Vault for EXPO staking and daily XLM yield.
 
-[**Live demo →**](https://exporouter.site) &nbsp;·&nbsp; ![CI](https://github.com/Div1912/ExpoPay/actions/workflows/ci.yml/badge.svg) &nbsp;·&nbsp; [![Latest Release](https://img.shields.io/github/v/release/Div1912/ExpoPay?label=release&color=blueviolet)](https://github.com/Div1912/ExpoPay/releases/latest)
+[**Live demo →**](https://exporouter.site) &nbsp;·&nbsp; ![CI](https://github.com/Div1912/ExpoPay/actions/workflows/ci.yml/badge.svg) &nbsp;·&nbsp; 
 
-[**MVP Video →**](https://youtu.be/nHyg3oPxe0Q)
+[**Latest Release →**][![V1.0.0](https://img.shields.io/github/v/release/Div1912/ExpoPay?label=release&color=blueviolet)](https://github.com/Div1912/ExpoPay/releases/latest)
+
+[**MVP Video →**]![VIDEO](https://youtu.be/nHyg3oPxe0Q)
 
 [**User feedbacks →**](https://docs.google.com/spreadsheets/d/e/2PACX-1vR82azl8byhjpi6hAnn8naPIsU5H-I_TGDyDFqdP2jv7xJXpp5O1MSdHBfHmFYH0v7Bka2FSSyrEbS2/pubhtml)
 
