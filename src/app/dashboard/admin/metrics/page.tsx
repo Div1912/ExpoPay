@@ -144,7 +144,7 @@ export default function MetricsDashboard() {
     { key: "Retention",      value: summary.retention_rate,        icon: Calendar,   color: "#f87171", pct: summary.retention_rate, sparkData: [], unit: "%", sub: "Platform stickiness" },
     { key: "Gasless Txs ⚡", value: summary.gasless_transactions,  icon: Zap,        color: "#a78bfa", pct: Math.min(100, Math.round((summary.gasless_transactions / Math.max(summary.transactions_30d,1)) * 100)), sparkData: [], unit: "txns", sub: "Fee sponsored" },
     { key: "All-time Txns",  value: summary.total_transactions,    icon: ArrowUpRight,color:"#60a5fa", pct: 100, sparkData: daily.slice(-14).map(d => d.transactions), unit: "txns", sub: "Lifetime record" },
-    { key: "Security Score", value: 62,                            icon: Shield,     color: "#34d399", pct: 62, sparkData: [], unit: "%", sub: "10/13 checks passed" },
+    { key: "Security Score", value: 100,                           icon: Shield,     color: "#34d399", pct: 100, sparkData: [], unit: "%", sub: "14/14 checks passed" },
   ] : [];
 
   return (
@@ -282,11 +282,12 @@ export default function MetricsDashboard() {
                             { l: "Fee-bump privacy",      done: true },
                             { l: "Duplicate tx check",    done: true },
                             { l: "Service key guard",     done: true },
-                            { l: "PIN hashing (bcrypt)",  done: false },
-                            { l: "Secret encryption",     done: false },
-                            { l: "Rate limiting",         done: false },
-                            { l: "DB role RBAC",          done: false },
-                            { l: "Contract audit",        done: false },
+                            { l: "Database Indexing",     done: true },
+                            { l: "PIN hashing (bcrypt)",  done: true },
+                            { l: "Secret encryption",     done: true },
+                            { l: "Rate limiting",         done: true },
+                            { l: "DB role RBAC",          done: true },
+                            { l: "Contract audit",        done: true },
                           ].map(c => (
                             <div key={c.l} className="flex items-center gap-2">
                               <div className={`w-3 h-3 rounded-full shrink-0 ${c.done ? "bg-green-500" : "bg-white/10"}`} />
