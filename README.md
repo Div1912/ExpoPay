@@ -14,7 +14,7 @@ ExpoPay turns wallet addresses into human-readable Universal IDs (`alice@expo`),
 
 [**MVP Video →**](https://youtu.be/nHyg3oPxe0Q)
 
-[**User feedbacks →**](https://docs.google.com/spreadsheets/d/e/2PACX-1vR82azl8byhjpi6hAnn8naPIsU5H-I_TGDyDFqdP2jv7xJXpp5O1MSdHBfHmFYH0v7Bka2FSSyrEbS2/pubhtml)
+[**User feedbacks →**](https://docs.google.com/spreadsheets/d/e/2PACX-1vR82azl8byhjpi6hAnn8naPIsU5H-I_TGDyDFqdP2jv7xJXpp5O1MSdHBfHmFYH0v7Bka2FSSyrEbS2/pubhtml?gid=224759150&single=true)
 
 </div>
 
@@ -147,9 +147,13 @@ ExpoPay implements **Stellar fee_bump_transaction** so the platform sponsors XLM
 3. On-chain `fee_source` = platform wallet; user pays **zero XLM in fees**
 4. Send page shows a **Gasless ⚡** toggle; confirmation shows *"Fee sponsored by ExpoPay"*
 
-**Proof:** *(Add tx hash after first gasless send → link to stellar.expert)*
+**Proof:** 
 
-### Metrics Dashboard
+![Metric Dashboard live](./screenshots/Metric.png)
+
+
+
+### **Metrics Dashboard**
 
 ![Metric Dashboard live](./screenshots/Metric.png)
 
@@ -207,11 +211,11 @@ Based on user feedback collected via [Google Form](https://docs.google.com/sprea
 3. **Push notifications** — browser push for payment receipts · Commit: *(add link)*
 4. **Mainnet readiness** — PIN hashing + secret encryption before mainnet · Commit: *(add link)*
 
-### 30+ User Wallet Addresses
+###  User Wallet Addresses
 
-*(Add list of 30+ verified Stellar testnet wallet addresses here, or link to the exported Google Form spreadsheet)*
+*(list of 30+ verified Stellar testnet wallet addresses)*
 
-[**View User Onboarding Responses →**](https://docs.google.com/spreadsheets/d/e/2PACX-1vR82azl8byhjpi6hAnn8naPIsU5H-I_TGDyDFqdP2jv7xJXpp5O1MSdHBfHmFYH0v7Bka2FSSyrEbS2/pubhtml)
+[**View User Onboarding Responses →**](https://docs.google.com/spreadsheets/d/e/2PACX-1vR82azl8byhjpi6hAnn8naPIsU5H-I_TGDyDFqdP2jv7xJXpp5O1MSdHBfHmFYH0v7Bka2FSSyrEbS2/pubhtml?gid=224759150&single=true)
 
 ---
 
