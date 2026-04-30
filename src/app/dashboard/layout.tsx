@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Send, QrCode, History, User, Scan, LayoutDashboard, Store, Settings, FileText, Users, TrendingUp } from "lucide-react";
+import { Send, QrCode, History, User, Scan, LayoutDashboard, Store, Settings, FileText, Users, TrendingUp, BarChart2, Radio, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 import { Background } from "@/components/Background";
@@ -48,6 +48,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { label: "My Code",     icon: QrCode,           href: "/dashboard/receive" },
   ];
 
+  const adminItems = [
+    { label: "Metrics",     icon: BarChart2,        href: "/dashboard/admin/metrics" },
+    { label: "Monitoring",  icon: Radio,            href: "/dashboard/admin/monitoring" },
+    { label: "Security",    icon: Shield,           href: "/dashboard/admin/security" },
+    { label: "Arbiter",     icon: FileText,         href: "/dashboard/admin" },
+  ];
+
   return (
     <InactivityGuard>
     <div className="min-h-screen bg-transparent text-white selection:bg-[#C694F9]/30">
@@ -86,6 +93,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               )}
             </Link>
           ))}
+
+          <div className="pt-4 pb-1">
+            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-2 px-3">Admin</p>
+            {adminItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "group flex items-center gap-3 px-3 h-10 rounded-xl transition-all relative overflow-hidden",
+                  mounted && pathname === item.href
+                    ? "bg-[#C694F9]/10 text-[#C694F9] border border-[#C694F9]/20"
+                    : "text-white/30 hover:text-white/70 hover:bg-white/5"
+                )}
+              >
+                <item.icon className={cn("w-4 h-4 shrink-0 transition-transform group-hover:scale-110",
+                  mounted && pathname === item.href ? "text-[#C694F9]" : "text-white/25")} />
+                <span className="font-bold tracking-tight text-xs">{item.label}</span>
+              </Link>
+            ))}
+          </div>
         </nav>
 
         <div className="pt-4 mt-2 border-t border-white/5 space-y-1 shrink-0">

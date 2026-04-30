@@ -4,6 +4,9 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { sendPayment } from '@/lib/stellar';
 import { getExchangeRate } from '@/lib/fx-service';
 import { notifyPayment } from '@/lib/notify';
+import { logInfo, logError, logWarn } from '@/lib/logger';
+
+const ROUTE = '/api/payments/send';
 
 export async function POST(request: Request) {
   const user = await getUser();
@@ -31,6 +34,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'PIN is required to authorize payment' }, { status: 400 });
     }
     if (senderProfile.app_pin !== pin) {
+      logWarn('payment_invalid_pin', { route: ROUTE, user_id: user.id }).catch(() => {});
       return NextResponse.json({ error: 'Invalid PIN. Please try again.' }, { status: 401 });
     }
   }
@@ -125,6 +129,12 @@ export async function POST(request: Request) {
       }).catch(console.error);
     }
 
+    logInfo('payment_success', {
+      route: ROUTE,
+      user_id: user.id,
+      meta: { amount, currency: sourceCurrency, xlm_amount: xlmAmount, tx_hash: txHash, recipient: recipientName },
+    }).catch(() => {});
+
     return NextResponse.json({ 
       success: true, 
       tx_hash: txHash,
@@ -133,6 +143,7 @@ export async function POST(request: Request) {
       xlm_amount: parseFloat(xlmAmount)
     });
   } catch (error: any) {
+    logError('payment_failed', error, { route: ROUTE, user_id: user.id }).catch(() => {});
     console.error('Payment error:', error);
     return NextResponse.json({ error: error.message || 'Payment failed' }, { status: 500 });
   }
