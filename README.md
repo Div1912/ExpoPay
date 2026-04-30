@@ -149,7 +149,7 @@ ExpoPay implements **Stellar fee_bump_transaction** so the platform sponsors XLM
 
 **Proof:** 
 
-![Metric Dashboard live](./screenshots/Metric.png)
+![Metric Dashboard live](./screenshots/Fee.png)
 
 
 
