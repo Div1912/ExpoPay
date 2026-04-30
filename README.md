@@ -6,7 +6,7 @@
 
 **Cross-border payments, escrow, group bills, and on-chain savings — all on Stellar.**
 
-ExpoPay turns wallet addresses into human-readable Universal IDs (`alice@expo`), settles payments in seconds via Stellar, lets Indian merchants receive INR via UPI, lets freelancers and clients lock milestone funds in a Soroban contract, splits group bills automatically, and provides an on-chain Vault for EXPO staking and daily XLM yield.
+ExpoPay turns wallet addresses into human-readable Universal IDs (`alice@expo`), settles payments in seconds via Stellar, lets Indian merchants receive INR via UPI, lets freelancers and clients lock funds in Soroban escrow, and adds vault savings with yield on XLM.
 
 [**Live demo →**](https://exporouter.site) &nbsp;·&nbsp; ![CI](https://github.com/Div1912/ExpoPay/actions/workflows/ci.yml/badge.svg) &nbsp;·&nbsp; 
 
@@ -97,7 +97,7 @@ Indexes added:
 🐦 *(Add your Twitter/X post link here after posting)*
 
 Tweet content:
-> 🚀 Built @ExpoPay on @StellarOrg — global payments with Universal IDs (alice@expo), ⚡ gasless transactions via Fee Bump, Soroban escrow, Indian UPI bridge, split bills & on-chain vault. Try it: https://exporouter.site #Stellar #Soroban #BuildOnStellar
+> 🚀 Built @ExpoPay on @StellarOrg — global payments with Universal IDs (alice@expo), ⚡ gasless transactions via Fee Bump, Soroban escrow, Indian UPI bridge, split bills & on-chain vault. TX summary: [...]
 
 ### User Onboarding Improvement Plan
 
@@ -187,7 +187,7 @@ Lock funds in a Soroban contract, mark delivered, release on completion. If some
 
 ### 6 · Split bills *(new)*
 
-Create a bill, pick `@expo` participants, choose **Equal** or **Custom shares**, and the app tracks who's paid and who hasn't. Each participant pays from their own balance with a single tap; the creator gets paid out directly.
+Create a bill, pick `@expo` participants, choose **Equal** or **Custom shares**, and the app tracks who's paid and who hasn't. Each participant pays from their own balance with a single tap; the split updates in real time for everyone.
 
 ![Create new split](./screenshots/split-new.png)
 
@@ -207,7 +207,7 @@ Two products in one tab. Live earnings ticker, animated stake progress, and a bu
 
 #### Staking
 
-Lock EXPO for 30, 60, or 90 days for **1.25% / 3.00% / 6.00%** flat reward (≈15 / 18 / 24% APR). Each active stake card shows current value, time remaining, accrued reward (animated 1 Hz), and unlocks at maturity.
+Lock EXPO for 30, 60, or 90 days for **1.25% / 3.00% / 6.00%** flat reward (≈15 / 18 / 24% APR). Each active stake card shows current value, time remaining, accrued reward (animated 1 Hz), and a one-tap claim when the lock expires.
 
 ![Vault overview with tier cards](./screenshots/vault-overview.png)
 
@@ -232,6 +232,8 @@ Deposit XLM with **no lock-up**, earn EXPO at 0.5% per XLM per day (~18% APR). W
 Every push runs the `ci.yml` workflow: typecheck, lint, build, contract test suite.
 
 ![CI passing](./screenshots/ci-passing.png)
+
+![Metric Dashboard live](./screenshots/Metric.png)
 
 ---
 
