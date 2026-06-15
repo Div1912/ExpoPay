@@ -31,6 +31,15 @@ ExpoPay turns wallet addresses into human-readable Universal IDs (`alice@expo`),
 9. [Security notes](#security-notes)
 10. [Roadmap](#roadmap)
 11. [Release notes](#release-notes)
+12. [Documentation set](#documentation-set)
+
+---
+
+## Documentation set
+
+- [/home/runner/work/ExpoPay/ExpoPay/Div1912/ExpoPay/docs/FEATURES.md](./docs/FEATURES.md) — complete feature-by-feature inventory
+- [/home/runner/work/ExpoPay/ExpoPay/Div1912/ExpoPay/docs/USER_GUIDE.md](./docs/USER_GUIDE.md) — end-user walkthroughs
+- [/home/runner/work/ExpoPay/ExpoPay/Div1912/ExpoPay/docs/TECHNICAL.md](./docs/TECHNICAL.md) — architecture, APIs, contracts, deployment
 
 ---
 
