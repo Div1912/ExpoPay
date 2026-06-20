@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motion } from 'framer-motion';
+import { BeamsBackground } from '@/components/ui/beams-background';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -112,7 +113,9 @@ const Hero = () => {
       ref={sectionRef}
       className="relative h-[200vh] bg-black overflow-hidden"
     >
-      <div className="absolute inset-0 bg-grid opacity-20" />
+      <div className="absolute inset-0 pointer-events-none">
+        <BeamsBackground className="absolute inset-0 min-h-[200vh] z-0" intensity="medium" />
+      </div>
       
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-[40vw] max-w-[500px] aspect-square rounded-full bg-[#C694F9]/20 blur-[100px] md:blur-[150px]" />
@@ -230,11 +233,20 @@ const Hero = () => {
                   </div>
                 </div>
 
-              <div className="p-4 sm:p-5 md:p-7 pb-8 sm:pb-10 md:pb-12">
+              <div className="p-4 sm:p-5 md:p-7 pb-8 sm:pb-10 md:pb-12 relative group">
+                {/* Vengeance UI Glowing Background Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#C694F9] via-[#F5A7C4] to-[#94A1F9] rounded-full blur-xl opacity-20 group-hover:opacity-60 transition-opacity duration-500 max-w-[80%] mx-auto top-6 bottom-8" />
+                
                 <Link 
                   href="/auth/signup" 
-                  className="w-full h-[44px] sm:h-[50px] md:h-[56px] rounded-full bg-white text-black font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-[0_15px_30px_rgba(255,255,255,0.12)]"
+                  className="relative w-full h-[44px] sm:h-[50px] md:h-[56px] rounded-full bg-white text-black font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-[0_15px_30px_rgba(255,255,255,0.12)] z-10 overflow-hidden"
                 >
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg]"
+                    initial={{ x: "-150%" }}
+                    animate={{ x: "150%" }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+                  />
                   GET STARTED
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 sm:w-4 md:w-[18px]">
                     <path d="M5 12h14m-7-7 7 7-7 7" />
