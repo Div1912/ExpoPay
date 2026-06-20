@@ -177,6 +177,7 @@ export function BeamsBackground({
                 <canvas
                     ref={canvasRef}
                     className="absolute inset-0"
+                    style={{ filter: "blur(3px)" }}
                 />
 
                 <motion.div
