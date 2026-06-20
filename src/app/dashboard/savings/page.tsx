@@ -17,14 +17,14 @@ import { format, formatDistanceToNow } from "date-fns";
 // contract caps and Indian regulatory disclosure norms.
 const TIERS = [
   { days: 30, bps: 125, rate: "1.25%", apr: "~15% APR", label: "Bronze",
-    gradient: "from-white/5 to-transparent", border: "border-white/10",
-    glow: "shadow-[0_0_30px_rgba(255,255,255,0.02)] group-hover:shadow-[0_0_40px_rgba(255,255,255,0.05)]", badge: "" },
+    gradient: "from-[#D4AF37]/10 to-transparent", border: "border-[#D4AF37]/20",
+    glow: "shadow-[0_0_30px_rgba(212,175,55,0.02)] group-hover:shadow-[0_0_40px_rgba(212,175,55,0.08)]", badge: "" },
   { days: 60, bps: 300, rate: "3.00%", apr: "~18% APR", label: "Silver",
-    gradient: "from-white/10 to-transparent", border: "border-white/20",
-    glow: "shadow-[0_0_30px_rgba(255,255,255,0.05)] group-hover:shadow-[0_0_40px_rgba(255,255,255,0.1)]", badge: "Popular" },
+    gradient: "from-[#D4AF37]/15 to-transparent", border: "border-[#D4AF37]/30",
+    glow: "shadow-[0_0_30px_rgba(212,175,55,0.05)] group-hover:shadow-[0_0_40px_rgba(212,175,55,0.15)]", badge: "Popular" },
   { days: 90, bps: 600, rate: "6.00%", apr: "~24% APR", label: "Gold",
-    gradient: "from-[#C694F9]/20 to-transparent", border: "border-[#C694F9]/30",
-    glow: "shadow-[0_0_40px_rgba(198,148,249,0.1)] group-hover:shadow-[0_0_50px_rgba(198,148,249,0.2)]", badge: "Best Rate" },
+    gradient: "from-[#D4AF37]/25 to-transparent", border: "border-[#D4AF37]/40",
+    glow: "shadow-[0_0_40px_rgba(212,175,55,0.1)] group-hover:shadow-[0_0_50px_rgba(212,175,55,0.25)]", badge: "Best Rate" },
 ];
 
 export default function SavingsPage() {
@@ -60,19 +60,19 @@ export default function SavingsPage() {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="relative"
       >
-        <div className="absolute -top-8 left-0 w-64 h-64 bg-[#C694F9]/8 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute -top-8 left-0 w-64 h-64 bg-[#D4AF37]/10 rounded-full blur-[80px] pointer-events-none" />
         <div className="relative">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#C694F9] to-[#94A1F9] flex items-center justify-center shadow-lg shadow-[#C694F9]/30 shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#D4AF37] to-amber-700 flex items-center justify-center shadow-lg shadow-[#D4AF37]/30 shrink-0">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#D4AF37]/70">
               ExpoPay Vault
             </span>
           </div>
           <h1 className="text-[clamp(2rem,9vw,4.5rem)] font-black tracking-tight uppercase leading-[0.85] mb-4 break-words font-jakarta">
             EARN<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFF3B0] via-[#D4AF37] to-[#8C6D1F]">
               REWARDS
             </span>
           </h1>
@@ -378,18 +378,18 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function StatCard({ label, value, sub, icon, color }: any) {
   const styles: any = {
-    purple: { ring: "from-white/5 to-transparent", icon: "bg-white/[0.03] border-white/10 text-white/70" },
-    cyan:   { ring: "from-white/5 to-transparent", icon: "bg-white/[0.03] border-white/10 text-white/70" },
-    orange: { ring: "from-white/5 to-transparent", icon: "bg-white/[0.03] border-white/10 text-white/70" },
-    green:  { ring: "from-white/5 to-transparent", icon: "bg-white/[0.03] border-white/10 text-white/70" },
+    purple: { ring: "from-[#D4AF37]/10 to-transparent", icon: "bg-[#D4AF37]/[0.05] border-[#D4AF37]/20 text-[#D4AF37]" },
+    cyan:   { ring: "from-[#D4AF37]/10 to-transparent", icon: "bg-[#D4AF37]/[0.05] border-[#D4AF37]/20 text-[#D4AF37]" },
+    orange: { ring: "from-[#D4AF37]/10 to-transparent", icon: "bg-[#D4AF37]/[0.05] border-[#D4AF37]/20 text-[#D4AF37]" },
+    green:  { ring: "from-[#D4AF37]/10 to-transparent", icon: "bg-[#D4AF37]/[0.05] border-[#D4AF37]/20 text-[#D4AF37]" },
   };
   const s = styles[color];
   return (
     <motion.div 
       whileHover={{ y: -2 }}
-      className={cn("relative overflow-hidden rounded-2xl border border-white/[0.05] bg-white/[0.01] p-3 sm:p-4 min-w-0 group cursor-default transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02] hover:shadow-[0_0_30px_rgba(255,255,255,0.03)]", s.ring)}
+      className={cn("relative overflow-hidden rounded-2xl border border-white/[0.05] bg-white/[0.01] p-3 sm:p-4 min-w-0 group cursor-default transition-all duration-500 hover:border-[#D4AF37]/20 hover:bg-[#D4AF37]/[0.02] hover:shadow-[0_0_30px_rgba(212,175,55,0.05)]", s.ring)}
     >
-      <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center mb-3 transition-colors duration-500 group-hover:bg-white/10 group-hover:text-white group-hover:border-white/20", s.icon)}>{icon}</div>
+      <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center mb-3 transition-colors duration-500 group-hover:bg-[#D4AF37]/20 group-hover:text-white group-hover:border-[#D4AF37]/40", s.icon)}>{icon}</div>
       <p className="font-black text-xl sm:text-2xl tracking-tight break-words leading-tight font-jakarta">
         {value}
         <span className="text-white/30 text-[10px] sm:text-xs font-bold ml-1 font-jakarta">{sub}</span>
@@ -422,25 +422,25 @@ function LiveEarningsStrip({
     <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-white/[0.05] bg-white/[0.01] p-4 group transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02]"
+      className="relative overflow-hidden rounded-2xl border border-white/[0.05] bg-white/[0.01] p-4 group transition-all duration-500 hover:border-[#D4AF37]/20 hover:bg-[#D4AF37]/[0.02] hover:shadow-[0_0_30px_rgba(212,175,55,0.05)]"
     >
-      <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/5 rounded-full blur-3xl transition-opacity duration-500 opacity-50 group-hover:opacity-100" />
+      <div className="absolute -top-8 -right-8 w-32 h-32 bg-[#D4AF37]/10 rounded-full blur-3xl transition-opacity duration-500 opacity-50 group-hover:opacity-100" />
       <div className="relative flex items-center justify-between gap-3 min-w-0">
         <div className="min-w-0 flex-1">
-          <p className="text-[9px] font-black uppercase tracking-[0.22em] text-white/50 mb-1 truncate font-jakarta">
+          <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#D4AF37]/70 mb-1 truncate font-jakarta">
             Total Earning Right Now
           </p>
-          <p className="font-black text-2xl sm:text-3xl text-white tabular-nums break-all leading-tight font-jakarta">
+          <p className="font-black text-2xl sm:text-3xl text-[#FFF3B0] tabular-nums break-all leading-tight font-jakarta drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">
             +{liveExtrapolated.toFixed(6)}
-            <span className="text-white/30 text-sm sm:text-base ml-1.5 font-bold font-jakarta">EXPO</span>
+            <span className="text-[#D4AF37] text-sm sm:text-base ml-1.5 font-bold font-jakarta">EXPO</span>
           </p>
           <p className="text-[10px] text-white/40 font-bold mt-1 truncate font-jakarta">
             Pool: +{poolAccrued.toFixed(4)} · Stakes pending: {pendingExpo.toFixed(2)}
           </p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0 self-start">
-          <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-pulse inline-block" />
-          <span className="text-[9px] font-black uppercase tracking-wider text-white/60 font-jakarta">live</span>
+          <span className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full animate-pulse inline-block shadow-[0_0_10px_rgba(212,175,55,0.8)]" />
+          <span className="text-[9px] font-black uppercase tracking-wider text-[#D4AF37] font-jakarta">live</span>
         </div>
       </div>
     </motion.section>
@@ -478,11 +478,11 @@ function CompoundProjection() {
     <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.01] p-4 sm:p-5 space-y-4 group transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02]"
+      className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.01] p-4 sm:p-5 space-y-4 group transition-all duration-500 hover:border-[#D4AF37]/30 hover:bg-[#D4AF37]/[0.02] hover:shadow-[0_0_30px_rgba(212,175,55,0.05)]"
     >
       <div className="flex items-center justify-between gap-2 min-w-0">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center shrink-0 transition-colors duration-500 group-hover:bg-white/10 group-hover:border-white/20">
+          <div className="w-9 h-9 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center shrink-0 transition-colors duration-500 group-hover:bg-[#D4AF37]/20 group-hover:border-[#D4AF37]/40">
             <Repeat className="w-4 h-4 text-white/70 group-hover:text-white transition-colors duration-500" />
           </div>
           <div className="min-w-0">
@@ -492,7 +492,7 @@ function CompoundProjection() {
             </p>
           </div>
         </div>
-        <span className="text-[9px] font-black uppercase tracking-wider bg-white/5 border border-white/10 text-white/70 px-2 py-1 rounded-full shrink-0 font-jakarta transition-colors duration-500 group-hover:bg-white/10 group-hover:text-white">
+        <span className="text-[9px] font-black uppercase tracking-wider bg-white/5 border border-white/10 text-white/70 px-2 py-1 rounded-full shrink-0 font-jakarta transition-colors duration-500 group-hover:bg-[#D4AF37]/20 group-hover:border-[#D4AF37]/40 group-hover:text-[#FFF3B0]">
           {projection.apy.toFixed(1)}% APY
         </span>
       </div>
@@ -510,7 +510,7 @@ function CompoundProjection() {
           step={100}
           value={amount}
           onChange={(e) => setAmount(Number(e.target.value))}
-          className="w-full accent-white h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer"
+          className="w-full h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer transition-all accent-white group-hover:accent-[#D4AF37]"
         />
       </div>
 
@@ -523,8 +523,8 @@ function CompoundProjection() {
             className={cn(
               "py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all font-jakarta",
               tierIdx === i
-                ? "bg-white/10 border border-white/20 text-white"
-                : "bg-white/[0.03] border border-white/[0.06] text-white/40 hover:bg-white/[0.05] hover:text-white/60"
+                ? "bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-white shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+                : "bg-white/[0.03] border border-white/[0.06] text-white/40 hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/20 hover:text-white/80"
             )}
           >
             {t.days}d · {t.rate}
@@ -538,20 +538,20 @@ function CompoundProjection() {
           label="Simple"
           value={projection.simple}
           max={projection.compound}
-          color="from-white/10 to-transparent"
+          color="from-white/10 to-transparent group-hover:from-[#D4AF37]/30"
         />
         <ProjectionBar
           label="Compounded"
           value={projection.compound}
           max={projection.compound}
-          color="from-white/60 to-white/20"
+          color="from-white/60 to-white/20 group-hover:from-[#D4AF37] group-hover:to-[#A68226]"
           highlight
         />
       </div>
 
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/[0.05] text-[10px] sm:text-xs font-bold flex-wrap font-jakarta">
+      <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/[0.05] text-[10px] sm:text-xs font-bold flex-wrap font-jakarta group-hover:border-[#D4AF37]/20 transition-colors">
         <span className="text-white/40 shrink-0">Extra from compounding</span>
-        <span className="text-white/70 font-black tabular-nums transition-colors duration-500 group-hover:text-white">
+        <span className="text-white/70 font-black tabular-nums transition-all duration-500 group-hover:text-[#FFF3B0] group-hover:drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]">
           +{projection.diff.toFixed(2)} EXPO
         </span>
       </div>
@@ -671,7 +671,7 @@ function StakeCard({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.01] p-4 sm:p-5 space-y-4 group transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02] hover:shadow-[0_0_30px_rgba(255,255,255,0.02)]"
+      className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.01] p-4 sm:p-5 space-y-4 group transition-all duration-500 hover:border-[#D4AF37]/20 hover:bg-[#D4AF37]/[0.02] hover:shadow-[0_0_30px_rgba(212,175,55,0.05)]"
     >
       <div className={cn("absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r opacity-40 group-hover:opacity-100 transition-opacity duration-500", tier.gradient)} />
 
@@ -679,11 +679,11 @@ function StakeCard({
       <div className="flex items-start justify-between gap-3 min-w-0">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className={cn(
-            "w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center border shrink-0 transition-colors duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:text-white",
+            "w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center border shrink-0 transition-colors duration-500 group-hover:bg-[#D4AF37]/20 group-hover:border-[#D4AF37]/40 group-hover:text-white",
             stake.status === "completed"
               ? "bg-white/[0.03] border-white/10 text-white/50"
               : isUnlocked
-              ? "bg-white/[0.03] border-white/10 text-white/70"
+              ? "bg-[#D4AF37]/10 border-[#D4AF37]/20 text-[#D4AF37]"
               : "bg-white/[0.03] border-white/10 text-white/70"
           )}>
             {stake.status === "completed"
@@ -704,7 +704,7 @@ function StakeCard({
             key={ticker}
             initial={{ opacity: 0.6 }}
             animate={{ opacity: 1 }}
-            className="font-black text-xs sm:text-sm text-white tabular-nums font-jakarta transition-colors duration-500"
+            className="font-black text-xs sm:text-sm text-[#FFF3B0] tabular-nums font-jakarta transition-all duration-500 group-hover:drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]"
           >
             +{live.accruedReward.toFixed(4)}
           </motion.p>
@@ -787,10 +787,10 @@ function StakeCard({
         <button
           onClick={handleUnstake}
           disabled={unstaking}
-          className="w-full h-12 bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] hover:border-white/20 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-jakarta text-white hover:shadow-[0_0_40px_rgba(255,255,255,0.05)]"
+          className="w-full h-12 bg-white/[0.03] border border-white/10 hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/30 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-jakarta text-white hover:text-[#FFF3B0] hover:shadow-[0_0_30px_rgba(212,175,55,0.1)]"
         >
           {unstaking
-            ? <><Loader2 className="w-4 h-4 animate-spin text-white/50" /> Unstaking…</>
+            ? <><Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]/50" /> Unstaking…</>
             : <>Collect Rewards</>}
         </button>
       )}
@@ -870,16 +870,16 @@ function PoolCard({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.01] p-4 sm:p-5 space-y-4 group transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02] hover:shadow-[0_0_30px_rgba(255,255,255,0.02)]"
+      className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.01] p-4 sm:p-5 space-y-4 group transition-all duration-500 hover:border-[#D4AF37]/20 hover:bg-[#D4AF37]/[0.02] hover:shadow-[0_0_30px_rgba(212,175,55,0.05)]"
     >
-      <div className="absolute top-0 left-0 w-full h-0.5 bg-white opacity-10 group-hover:opacity-30 transition-opacity duration-500" />
+      <div className="absolute top-0 left-0 w-full h-0.5 bg-[#D4AF37] opacity-10 group-hover:opacity-30 transition-opacity duration-500" />
       <div className="flex items-start justify-between gap-3 min-w-0">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className={cn(
             "w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center border shrink-0 transition-colors duration-500",
             isActive
-              ? "bg-white/[0.03] border-white/10 text-white/70 group-hover:bg-white/10 group-hover:border-white/20 group-hover:text-white"
-              : "bg-white/[0.03] border-white/10 text-white/50 group-hover:bg-white/10 group-hover:border-white/20 group-hover:text-white"
+              ? "bg-white/[0.03] border-white/10 text-white/70 group-hover:bg-[#D4AF37]/20 group-hover:border-[#D4AF37]/40 group-hover:text-white"
+              : "bg-white/[0.03] border-white/10 text-white/50 group-hover:bg-[#D4AF37]/20 group-hover:border-[#D4AF37]/40 group-hover:text-white"
           )}>
             {isActive ? <Droplets className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
           </div>
@@ -897,12 +897,12 @@ function PoolCard({
             key={`${ticker}-${position.id}`}
             initial={{ opacity: 0.5 }}
             animate={{ opacity: 1 }}
-            className="font-black text-xs sm:text-sm text-white tabular-nums font-jakarta transition-colors duration-500"
+            className="font-black text-xs sm:text-sm text-[#FFF3B0] tabular-nums font-jakarta transition-all duration-500 group-hover:drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]"
           >
             +{liveAccrued.toFixed(4)} EXPO
           </motion.p>
           <p className="text-[9px] text-white/30 font-bold flex items-center justify-end gap-1 font-jakarta">
-            {isActive && <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-pulse inline-block" />}
+            {isActive && <span className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full animate-pulse inline-block shadow-[0_0_8px_rgba(212,175,55,0.8)]" />}
             {isActive ? "accruing" : "earned"}
           </p>
         </div>
@@ -929,10 +929,10 @@ function PoolCard({
         <button
           onClick={handleWithdraw}
           disabled={withdrawing}
-          className="w-full h-12 bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] hover:border-white/20 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-jakarta text-white hover:shadow-[0_0_40px_rgba(255,255,255,0.05)]"
+          className="w-full h-12 bg-white/[0.03] border border-white/10 hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/30 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-jakarta text-white hover:text-[#FFF3B0] hover:shadow-[0_0_30px_rgba(212,175,55,0.1)]"
         >
           {withdrawing
-            ? <><Loader2 className="w-4 h-4 animate-spin text-white/50" /> Withdrawing…</>
+            ? <><Loader2 className="w-4 h-4 animate-spin text-[#D4AF37]/50" /> Withdrawing…</>
             : <span className="truncate">Withdraw {position.amount_xlm} XLM + EXPO</span>}
         </button>
       )}
