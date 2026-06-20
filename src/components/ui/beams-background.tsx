@@ -32,7 +32,7 @@ function createBeam(width: number, height: number): Beam {
         length: height * 2.5,
         angle: angle,
         speed: 0.6 + Math.random() * 1.2,
-        opacity: 0.12 + Math.random() * 0.16,
+        opacity: 0.4 + Math.random() * 0.4, // Boosted opacity (0.4 to 0.8)
         hue: 190 + Math.random() * 70,
         pulse: Math.random() * Math.PI * 2,
         pulseSpeed: 0.02 + Math.random() * 0.03,
@@ -93,7 +93,7 @@ export function BeamsBackground({
             beam.width = 100 + Math.random() * 100;
             beam.speed = 0.5 + Math.random() * 0.4;
             beam.hue = 190 + (index * 70) / totalBeams;
-            beam.opacity = 0.2 + Math.random() * 0.1;
+            beam.opacity = 0.4 + Math.random() * 0.4; // Boosted opacity
             return beam;
         }
 
@@ -139,7 +139,7 @@ export function BeamsBackground({
             if (!canvas || !ctx) return;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.filter = "blur(35px)";
+            ctx.filter = "blur(10px)";
 
             const totalBeams = beamsRef.current.length;
             beamsRef.current.forEach((beam, index) => {
@@ -177,13 +177,13 @@ export function BeamsBackground({
             <canvas
                 ref={canvasRef}
                 className="absolute inset-0"
-                style={{ filter: "blur(15px)" }}
+                style={{ filter: "blur(5px)" }}
             />
 
             <motion.div
-                className="absolute inset-0 bg-neutral-950/5"
+                className="absolute inset-0 bg-neutral-950/10"
                 animate={{
-                    opacity: [0.05, 0.15, 0.05],
+                    opacity: [0.1, 0.3, 0.1],
                 }}
                 transition={{
                     duration: 10,
@@ -191,7 +191,7 @@ export function BeamsBackground({
                     repeat: Infinity,
                 }}
                 style={{
-                    backdropFilter: "blur(50px)",
+                    backdropFilter: "blur(10px)",
                 }}
             />
             {children}
