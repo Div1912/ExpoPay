@@ -107,7 +107,7 @@ export default function QuickActions() {
   return (
     <section 
       ref={sectionRef}
-      className="relative bg-black overflow-hidden py-20 sm:py-28 md:py-36 lg:py-40"
+      className="relative bg-transparent overflow-hidden py-20 sm:py-28 md:py-36 lg:py-40"
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 right-0 w-[50vw] max-w-[600px] aspect-square rounded-full bg-purple-600/10 blur-[150px] md:blur-[200px]" />

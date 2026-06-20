@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motion } from 'framer-motion';
-import { BeamsBackground } from '@/components/ui/beams-background';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -111,10 +110,10 @@ const Hero = () => {
   return (
     <section 
       ref={sectionRef}
-      className="relative h-[200vh] bg-black overflow-hidden"
+      className="relative h-[200vh] overflow-hidden bg-transparent"
     >
       <div className="absolute inset-0 pointer-events-none">
-        <BeamsBackground className="absolute inset-0 min-h-[200vh] z-0" intensity="medium" />
+        <div className="absolute inset-0 bg-transparent z-0" />
       </div>
       
       <div className="absolute inset-0 overflow-hidden pointer-events-none">

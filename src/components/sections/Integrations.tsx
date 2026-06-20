@@ -128,8 +128,7 @@ const OrbitIcon = ({ icon, orbitRadius, counterRotate }: {
 };
 
 const Integrations = () => {
-  return (
-    <section className="relative w-full overflow-hidden bg-black py-20 sm:py-28 md:py-40 lg:py-56">
+    <section className="relative w-full overflow-hidden bg-transparent py-20 sm:py-28 md:py-40 lg:py-56">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[1200px] aspect-square rounded-full bg-gradient-to-br from-[#94A1F9]/10 to-[#C694F9]/5 blur-[180px] md:blur-[250px]" />
       </div>

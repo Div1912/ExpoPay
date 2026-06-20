@@ -39,7 +39,7 @@ const FooterCTA = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative w-full overflow-hidden bg-black">
+    <section ref={sectionRef} className="relative w-full overflow-hidden bg-transparent">
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div 
           className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[120vw] max-w-[1400px] h-[500px] sm:h-[600px] md:h-[700px] rounded-full opacity-25"

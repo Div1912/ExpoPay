@@ -91,7 +91,7 @@ export default function CardsSection() {
   return (
     <section 
       ref={sectionRef}
-      className="relative w-full bg-black py-20 sm:py-28 md:py-40 lg:py-56 overflow-hidden"
+      className="relative w-full bg-transparent py-20 sm:py-28 md:py-40 lg:py-56 overflow-hidden"
     >
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] max-w-[1000px] aspect-square rounded-full bg-gradient-to-br from-[#F5A7C4]/10 to-[#C694F9]/5 blur-[150px] md:blur-[200px]" />

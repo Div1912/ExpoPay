@@ -79,7 +79,7 @@ const Testimonials = () => {
   return (
     <section 
       ref={sectionRef}
-      className="relative w-full overflow-hidden bg-black py-20 sm:py-28 md:py-40 lg:py-56"
+      className="relative w-full overflow-hidden bg-transparent py-20 sm:py-28 md:py-40 lg:py-56"
     >
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] max-w-[900px] aspect-square rounded-full bg-gradient-to-br from-[#C694F9]/10 to-[#94A1F9]/5 blur-[150px] md:blur-[200px]" />

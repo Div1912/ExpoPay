@@ -170,30 +170,32 @@ export function BeamsBackground({
     return (
         <div
             className={cn(
-                "relative min-h-screen w-full overflow-hidden bg-black",
+                "relative min-h-screen w-full bg-black",
                 className
             )}
         >
-            <canvas
-                ref={canvasRef}
-                className="absolute inset-0"
-                style={{ filter: "blur(5px)" }}
-            />
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <canvas
+                    ref={canvasRef}
+                    className="absolute inset-0"
+                    style={{ filter: "blur(5px)" }}
+                />
 
-            <motion.div
-                className="absolute inset-0 bg-neutral-950/10"
-                animate={{
-                    opacity: [0.1, 0.3, 0.1],
-                }}
-                transition={{
-                    duration: 10,
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                }}
-                style={{
-                    backdropFilter: "blur(10px)",
-                }}
-            />
+                <motion.div
+                    className="absolute inset-0 bg-neutral-950/10"
+                    animate={{
+                        opacity: [0.1, 0.3, 0.1],
+                    }}
+                    transition={{
+                        duration: 10,
+                        ease: "easeInOut",
+                        repeat: Infinity,
+                    }}
+                    style={{
+                        backdropFilter: "blur(10px)",
+                    }}
+                />
+            </div>
             <div className="relative z-10 w-full h-full">
                 {children}
             </div>
