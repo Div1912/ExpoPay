@@ -17,14 +17,14 @@ import { format, formatDistanceToNow } from "date-fns";
 // contract caps and Indian regulatory disclosure norms.
 const TIERS = [
   { days: 30, bps: 125, rate: "1.25%", apr: "~15% APR", label: "Bronze",
-    gradient: "from-amber-700/60 to-amber-600/40", border: "border-amber-600/30",
-    glow: "shadow-amber-600/20", badge: "" },
+    gradient: "from-white/5 to-transparent", border: "border-white/10",
+    glow: "shadow-[0_0_30px_rgba(255,255,255,0.02)] group-hover:shadow-[0_0_40px_rgba(255,255,255,0.05)]", badge: "" },
   { days: 60, bps: 300, rate: "3.00%", apr: "~18% APR", label: "Silver",
-    gradient: "from-slate-400/40 to-slate-300/20", border: "border-slate-400/30",
-    glow: "shadow-slate-400/20", badge: "Popular" },
+    gradient: "from-white/10 to-transparent", border: "border-white/20",
+    glow: "shadow-[0_0_30px_rgba(255,255,255,0.05)] group-hover:shadow-[0_0_40px_rgba(255,255,255,0.1)]", badge: "Popular" },
   { days: 90, bps: 600, rate: "6.00%", apr: "~24% APR", label: "Gold",
-    gradient: "from-yellow-500/50 to-amber-400/30", border: "border-yellow-500/40",
-    glow: "shadow-yellow-500/25", badge: "Best Rate" },
+    gradient: "from-[#C694F9]/20 to-transparent", border: "border-[#C694F9]/30",
+    glow: "shadow-[0_0_40px_rgba(198,148,249,0.1)] group-hover:shadow-[0_0_50px_rgba(198,148,249,0.2)]", badge: "Best Rate" },
 ];
 
 export default function SavingsPage() {
@@ -54,36 +54,40 @@ export default function SavingsPage() {
     <div className="space-y-8 sm:space-y-10 pb-24 max-w-2xl mx-auto">
 
       {/* ── Hero Header ── */}
-      <section className="relative">
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="relative"
+      >
         <div className="absolute -top-8 left-0 w-64 h-64 bg-[#C694F9]/8 rounded-full blur-[80px] pointer-events-none" />
         <div className="relative">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#C694F9] to-[#94A1F9] flex items-center justify-center shadow-lg shadow-[#C694F9]/30 shrink-0">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#C694F9]/70">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">
               ExpoPay Vault
             </span>
           </div>
-          <h1 className="text-[clamp(2rem,9vw,4.5rem)] font-black tracking-tight uppercase leading-[0.85] mb-4 break-words"
-            style={{ fontFamily: "var(--font-syne)" }}>
+          <h1 className="text-[clamp(2rem,9vw,4.5rem)] font-black tracking-tight uppercase leading-[0.85] mb-4 break-words font-jakarta">
             EARN<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C694F9] via-[#F5A7C4] to-[#94A1F9]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/40">
               REWARDS
             </span>
           </h1>
-          <p className="text-white/40 text-sm font-medium max-w-sm">
+          <p className="text-white/40 text-sm font-medium max-w-sm font-jakarta">
             Stake EXPO or deposit XLM to earn rewards on-chain via Stellar smart contracts.
           </p>
 
-          <div className="mt-4 flex items-start gap-2 bg-amber-500/5 border border-amber-500/15 rounded-2xl px-4 py-3">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-            <p className="text-[10px] text-amber-400/70 font-medium leading-relaxed">
+          <div className="mt-4 flex items-start gap-2 bg-white/[0.02] border border-white/[0.05] rounded-2xl px-4 py-3">
+            <AlertTriangle className="w-4 h-4 text-white/40 shrink-0 mt-0.5" />
+            <p className="text-[10px] text-white/40 font-medium leading-relaxed font-jakarta">
               Staking rewards are taxable as VDA income at 30% under the Income Tax Act, 1961. Returns are variable and not guaranteed.
             </p>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -138,23 +142,23 @@ export default function SavingsPage() {
           )}
 
           {/* ── Tab switcher ── */}
-          <section className="relative flex p-1 bg-white/[0.03] border border-white/[0.06] rounded-2xl">
+          <section className="relative flex p-1 bg-white/[0.02] border border-white/[0.05] rounded-2xl">
             {(["staking", "pool"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className="relative flex-1 py-3 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all"
+                className="relative flex-1 py-3 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all font-jakarta"
               >
                 {activeTab === tab && (
                   <motion.div
                     layoutId="vault-tab"
-                    className="absolute inset-0 bg-gradient-to-r from-[#C694F9]/20 to-[#94A1F9]/10 rounded-xl border border-[#C694F9]/30"
+                    className="absolute inset-0 bg-white/[0.05] rounded-xl border border-white/[0.1]"
                     transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                   />
                 )}
                 <span className={cn(
-                  "relative z-10 transition-colors",
-                  activeTab === tab ? "text-[#C694F9]" : "text-white/30"
+                  "relative z-10 transition-colors duration-500",
+                  activeTab === tab ? "text-white" : "text-white/30 hover:text-white/50"
                 )}>
                   {tab === "staking" ? "EXPO Staking" : "XLM Pool"}
                 </span>
@@ -214,11 +218,11 @@ export default function SavingsPage() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    className="w-full h-16 bg-gradient-to-r from-[#C694F9] to-[#94A1F9] rounded-2xl font-black uppercase tracking-wider text-sm sm:text-base shadow-2xl shadow-[#C694F9]/30 flex items-center justify-center gap-3 group"
+                    className="w-full h-16 bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] hover:border-white/20 rounded-2xl font-black uppercase tracking-wider text-sm sm:text-base transition-all duration-500 flex items-center justify-center gap-3 group font-jakarta text-white hover:shadow-[0_0_40px_rgba(255,255,255,0.05)]"
                   >
-                    <Lock className="w-5 h-5" />
+                    <Lock className="w-5 h-5 text-white/50 group-hover:text-white transition-colors duration-500" />
                     <span className="truncate">Stake EXPO Now</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform shrink-0" />
+                    <ArrowRight className="w-5 h-5 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all duration-500 shrink-0" />
                   </motion.button>
                 </Link>
 
@@ -269,36 +273,36 @@ export default function SavingsPage() {
                 className="space-y-6"
               >
                 {/* Pool hero card */}
-                <div className="relative overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-cyan-500/10 to-[#94A1F9]/10 p-5 sm:p-6">
-                  <div className="absolute -top-12 -right-12 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl" />
-                  <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-[#C694F9]/10 rounded-full blur-3xl" />
+                <div className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.01] p-5 sm:p-6 group transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02]">
+                  <div className="absolute -top-12 -right-12 w-40 h-40 bg-white/5 rounded-full blur-3xl transition-opacity duration-500 opacity-50 group-hover:opacity-100" />
+                  <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-white/5 rounded-full blur-3xl transition-opacity duration-500 opacity-50 group-hover:opacity-100" />
                   <div className="relative z-10 space-y-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center shrink-0">
-                        <Droplets className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center shrink-0 transition-colors duration-500 group-hover:bg-white/10 group-hover:border-white/20">
+                        <Droplets className="w-5 h-5 sm:w-6 sm:h-6 text-white/70 group-hover:text-white transition-colors duration-500" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-black text-base sm:text-lg truncate">EXPO Yield Pool</p>
-                        <p className="text-[9px] sm:text-[10px] text-white/40 font-bold uppercase tracking-wider truncate">
+                        <p className="font-black text-base sm:text-lg truncate font-jakarta">EXPO Yield Pool</p>
+                        <p className="text-[9px] sm:text-[10px] text-white/40 font-bold uppercase tracking-wider truncate font-jakarta">
                           Deposit XLM → Earn EXPO Daily
                         </p>
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2 sm:gap-3">
                       {[
-                        { label: "Est. APR", value: "~18%", color: "text-cyan-400" },
-                        { label: "Lock-up",  value: "None",  color: "text-green-400" },
-                        { label: "Rewards",  value: "EXPO",  color: "text-[#C694F9]" },
+                        { label: "Est. APR", value: "~18%", color: "text-white" },
+                        { label: "Lock-up",  value: "None",  color: "text-white/70" },
+                        { label: "Rewards",  value: "EXPO",  color: "text-white/70" },
                       ].map(({ label, value, color }) => (
-                        <div key={label} className="bg-white/5 rounded-2xl p-3 text-center">
-                          <p className={cn("font-black text-base sm:text-xl", color)}>{value}</p>
-                          <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/30 mt-0.5">
+                        <div key={label} className="bg-white/5 border border-white/[0.05] rounded-2xl p-3 text-center transition-colors duration-500 group-hover:bg-white/10 group-hover:border-white/10">
+                          <p className={cn("font-black text-base sm:text-xl font-jakarta", color)}>{value}</p>
+                          <p className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/40 mt-0.5 font-jakarta">
                             {label}
                           </p>
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs text-white/40 leading-relaxed">
+                    <p className="text-xs text-white/40 leading-relaxed font-jakarta">
                       No lock-up — withdraw anytime with accrued EXPO. Powered by ExpoPay smart contracts on Stellar.
                     </p>
                   </div>
@@ -308,11 +312,11 @@ export default function SavingsPage() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    className="w-full h-16 bg-gradient-to-r from-cyan-500 to-[#C694F9] rounded-2xl font-black uppercase tracking-wider text-sm sm:text-base shadow-2xl shadow-cyan-500/20 flex items-center justify-center gap-3 group"
+                    className="w-full h-16 bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] hover:border-white/20 rounded-2xl font-black uppercase tracking-wider text-sm sm:text-base transition-all duration-500 flex items-center justify-center gap-3 group font-jakarta text-white hover:shadow-[0_0_40px_rgba(255,255,255,0.05)]"
                   >
-                    <Droplets className="w-5 h-5" />
+                    <Droplets className="w-5 h-5 text-white/50 group-hover:text-white transition-colors duration-500" />
                     <span className="truncate">Deposit to Pool</span>
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform shrink-0" />
+                    <ArrowRight className="w-5 h-5 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all duration-500 shrink-0" />
                   </motion.button>
                 </Link>
 
@@ -374,23 +378,26 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function StatCard({ label, value, sub, icon, color }: any) {
   const styles: any = {
-    purple: { ring: "from-[#C694F9]/20 to-[#94A1F9]/10", icon: "bg-[#C694F9]/15 border-[#C694F9]/25 text-[#C694F9]" },
-    cyan:   { ring: "from-cyan-500/15 to-cyan-400/5",     icon: "bg-cyan-500/15   border-cyan-500/25   text-cyan-400" },
-    orange: { ring: "from-orange-500/15 to-red-400/5",    icon: "bg-orange-500/15 border-orange-500/25 text-orange-400" },
-    green:  { ring: "from-green-500/15 to-emerald-400/5", icon: "bg-green-500/15  border-green-500/25  text-green-400" },
+    purple: { ring: "from-white/5 to-transparent", icon: "bg-white/[0.03] border-white/10 text-white/70" },
+    cyan:   { ring: "from-white/5 to-transparent", icon: "bg-white/[0.03] border-white/10 text-white/70" },
+    orange: { ring: "from-white/5 to-transparent", icon: "bg-white/[0.03] border-white/10 text-white/70" },
+    green:  { ring: "from-white/5 to-transparent", icon: "bg-white/[0.03] border-white/10 text-white/70" },
   };
   const s = styles[color];
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br p-3 sm:p-4 min-w-0", s.ring)}>
-      <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center mb-3", s.icon)}>{icon}</div>
-      <p className="font-black text-xl sm:text-2xl tracking-tight break-words leading-tight">
+    <motion.div 
+      whileHover={{ y: -2 }}
+      className={cn("relative overflow-hidden rounded-2xl border border-white/[0.05] bg-white/[0.01] p-3 sm:p-4 min-w-0 group cursor-default transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02] hover:shadow-[0_0_30px_rgba(255,255,255,0.03)]", s.ring)}
+    >
+      <div className={cn("w-9 h-9 rounded-xl border flex items-center justify-center mb-3 transition-colors duration-500 group-hover:bg-white/10 group-hover:text-white group-hover:border-white/20", s.icon)}>{icon}</div>
+      <p className="font-black text-xl sm:text-2xl tracking-tight break-words leading-tight font-jakarta">
         {value}
-        <span className="text-white/30 text-[10px] sm:text-xs font-bold ml-1">{sub}</span>
+        <span className="text-white/30 text-[10px] sm:text-xs font-bold ml-1 font-jakarta">{sub}</span>
       </p>
-      <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-white/30 mt-1 truncate">
+      <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-white/30 mt-1 truncate font-jakarta">
         {label}
       </p>
-    </div>
+    </motion.div>
   );
 }
 
@@ -415,25 +422,25 @@ function LiveEarningsStrip({
     <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-[#C694F9]/20 bg-gradient-to-br from-[#C694F9]/10 via-transparent to-[#94A1F9]/10 p-4"
+      className="relative overflow-hidden rounded-2xl border border-white/[0.05] bg-white/[0.01] p-4 group transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02]"
     >
-      <div className="absolute -top-8 -right-8 w-32 h-32 bg-[#C694F9]/10 rounded-full blur-3xl" />
+      <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/5 rounded-full blur-3xl transition-opacity duration-500 opacity-50 group-hover:opacity-100" />
       <div className="relative flex items-center justify-between gap-3 min-w-0">
         <div className="min-w-0 flex-1">
-          <p className="text-[9px] font-black uppercase tracking-[0.22em] text-[#C694F9]/70 mb-1 truncate">
+          <p className="text-[9px] font-black uppercase tracking-[0.22em] text-white/50 mb-1 truncate font-jakarta">
             Total Earning Right Now
           </p>
-          <p className="font-black text-2xl sm:text-3xl text-white tabular-nums break-all leading-tight">
+          <p className="font-black text-2xl sm:text-3xl text-white tabular-nums break-all leading-tight font-jakarta">
             +{liveExtrapolated.toFixed(6)}
-            <span className="text-white/30 text-sm sm:text-base ml-1.5 font-bold">EXPO</span>
+            <span className="text-white/30 text-sm sm:text-base ml-1.5 font-bold font-jakarta">EXPO</span>
           </p>
-          <p className="text-[10px] text-white/40 font-bold mt-1 truncate">
+          <p className="text-[10px] text-white/40 font-bold mt-1 truncate font-jakarta">
             Pool: +{poolAccrued.toFixed(4)} · Stakes pending: {pendingExpo.toFixed(2)}
           </p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0 self-start">
-          <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse inline-block" />
-          <span className="text-[9px] font-black uppercase tracking-wider text-green-400">live</span>
+          <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-pulse inline-block" />
+          <span className="text-[9px] font-black uppercase tracking-wider text-white/60 font-jakarta">live</span>
         </div>
       </div>
     </motion.section>
@@ -471,28 +478,28 @@ function CompoundProjection() {
     <motion.section
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-white/[0.02] p-4 sm:p-5 space-y-4"
+      className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.01] p-4 sm:p-5 space-y-4 group transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02]"
     >
       <div className="flex items-center justify-between gap-2 min-w-0">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#C694F9]/20 to-[#94A1F9]/10 border border-[#C694F9]/25 flex items-center justify-center shrink-0">
-            <Repeat className="w-4 h-4 text-[#C694F9]" />
+          <div className="w-9 h-9 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center shrink-0 transition-colors duration-500 group-hover:bg-white/10 group-hover:border-white/20">
+            <Repeat className="w-4 h-4 text-white/70 group-hover:text-white transition-colors duration-500" />
           </div>
           <div className="min-w-0">
-            <p className="font-black text-sm uppercase tracking-wider truncate">Compound Projection</p>
-            <p className="text-[9px] text-white/40 font-bold uppercase tracking-wider truncate">
+            <p className="font-black text-sm uppercase tracking-wider truncate font-jakarta">Compound Projection</p>
+            <p className="text-[9px] text-white/40 font-bold uppercase tracking-wider truncate font-jakarta">
               Auto-roll same tier · 1 yr
             </p>
           </div>
         </div>
-        <span className="text-[9px] font-black uppercase tracking-wider bg-[#C694F9]/10 border border-[#C694F9]/25 text-[#C694F9] px-2 py-1 rounded-full shrink-0">
+        <span className="text-[9px] font-black uppercase tracking-wider bg-white/5 border border-white/10 text-white/70 px-2 py-1 rounded-full shrink-0 font-jakarta transition-colors duration-500 group-hover:bg-white/10 group-hover:text-white">
           {projection.apy.toFixed(1)}% APY
         </span>
       </div>
 
       {/* Amount input */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between text-[10px] font-bold text-white/40">
+        <div className="flex items-center justify-between text-[10px] font-bold text-white/40 font-jakarta">
           <span>Stake amount</span>
           <span className="tabular-nums">{amount.toLocaleString()} EXPO</span>
         </div>
@@ -503,7 +510,7 @@ function CompoundProjection() {
           step={100}
           value={amount}
           onChange={(e) => setAmount(Number(e.target.value))}
-          className="w-full accent-[#C694F9] h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer"
+          className="w-full accent-white h-1.5 bg-white/5 rounded-lg appearance-none cursor-pointer"
         />
       </div>
 
@@ -514,10 +521,10 @@ function CompoundProjection() {
             key={t.days}
             onClick={() => setTierIdx(i)}
             className={cn(
-              "py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all",
+              "py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all font-jakarta",
               tierIdx === i
-                ? "bg-[#C694F9]/15 border border-[#C694F9]/30 text-[#C694F9]"
-                : "bg-white/[0.03] border border-white/[0.06] text-white/40"
+                ? "bg-white/10 border border-white/20 text-white"
+                : "bg-white/[0.03] border border-white/[0.06] text-white/40 hover:bg-white/[0.05] hover:text-white/60"
             )}
           >
             {t.days}d · {t.rate}
@@ -531,25 +538,25 @@ function CompoundProjection() {
           label="Simple"
           value={projection.simple}
           max={projection.compound}
-          color="from-white/30 to-white/10"
+          color="from-white/10 to-transparent"
         />
         <ProjectionBar
           label="Compounded"
           value={projection.compound}
           max={projection.compound}
-          color="from-[#C694F9] to-[#94A1F9]"
+          color="from-white/60 to-white/20"
           highlight
         />
       </div>
 
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/[0.06] text-[10px] sm:text-xs font-bold flex-wrap">
+      <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/[0.05] text-[10px] sm:text-xs font-bold flex-wrap font-jakarta">
         <span className="text-white/40 shrink-0">Extra from compounding</span>
-        <span className="text-green-400 font-black tabular-nums">
+        <span className="text-white/70 font-black tabular-nums transition-colors duration-500 group-hover:text-white">
           +{projection.diff.toFixed(2)} EXPO
         </span>
       </div>
 
-      <p className="text-[9px] text-white/30 leading-relaxed">
+      <p className="text-[9px] text-white/30 leading-relaxed font-jakarta">
         Projection assumes you re-stake principal + rewards every {projection.tier.days} days (~{projection.periods} cycles/yr) at the same rate. Real returns depend on tier availability and contract caps.
       </p>
     </motion.section>
@@ -572,11 +579,11 @@ function ProjectionBar({
   const pct = max > 0 ? (value / max) * 100 : 0;
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold gap-2">
-        <span className={cn("uppercase tracking-wider truncate", highlight ? "text-[#C694F9]" : "text-white/40")}>
+      <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-bold gap-2 font-jakarta">
+        <span className={cn("uppercase tracking-wider truncate transition-colors duration-500", highlight ? "text-white/80" : "text-white/40")}>
           {label}
         </span>
-        <span className={cn("font-black tabular-nums shrink-0", highlight ? "text-white" : "text-white/60")}>
+        <span className={cn("font-black tabular-nums shrink-0 transition-colors duration-500", highlight ? "text-white" : "text-white/40")}>
           +{value.toFixed(2)} EXPO
         </span>
       </div>
@@ -664,30 +671,30 @@ function StakeCard({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 sm:p-5 space-y-4"
+      className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.01] p-4 sm:p-5 space-y-4 group transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02] hover:shadow-[0_0_30px_rgba(255,255,255,0.02)]"
     >
-      <div className={cn("absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r opacity-60", tier.gradient)} />
+      <div className={cn("absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r opacity-40 group-hover:opacity-100 transition-opacity duration-500", tier.gradient)} />
 
       {/* Header row */}
       <div className="flex items-start justify-between gap-3 min-w-0">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className={cn(
-            "w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center border shrink-0",
+            "w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center border shrink-0 transition-colors duration-500 group-hover:bg-white/10 group-hover:border-white/20 group-hover:text-white",
             stake.status === "completed"
-              ? "bg-green-500/10 border-green-500/20 text-green-400"
+              ? "bg-white/[0.03] border-white/10 text-white/50"
               : isUnlocked
-              ? "bg-amber-500/10 border-amber-500/20"
-              : `bg-gradient-to-br ${tier.gradient} ${tier.border}`
+              ? "bg-white/[0.03] border-white/10 text-white/70"
+              : "bg-white/[0.03] border-white/10 text-white/70"
           )}>
             {stake.status === "completed"
               ? <CheckCircle2 className="w-5 h-5" />
-              : <Lock className="w-5 h-5 text-white/70" />}
+              : <Lock className="w-5 h-5" />}
           </div>
           <div className="min-w-0">
-            <p className="font-black text-sm sm:text-base break-words leading-tight">
+            <p className="font-black text-sm sm:text-base break-words leading-tight font-jakarta">
               {live.principal} <span className="text-white/40">EXPO</span>
             </p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 truncate">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 truncate font-jakarta">
               {stake.duration_days}-day · {tier.label} · {tier.rate}
             </p>
           </div>
@@ -697,11 +704,11 @@ function StakeCard({
             key={ticker}
             initial={{ opacity: 0.6 }}
             animate={{ opacity: 1 }}
-            className="font-black text-xs sm:text-sm text-green-400 tabular-nums"
+            className="font-black text-xs sm:text-sm text-white tabular-nums font-jakarta transition-colors duration-500"
           >
             +{live.accruedReward.toFixed(4)}
           </motion.p>
-          <p className="text-[9px] text-white/30 font-bold uppercase tracking-wider">
+          <p className="text-[9px] text-white/30 font-bold uppercase tracking-wider font-jakarta">
             of {live.fullReward.toFixed(2)}
           </p>
         </div>
@@ -720,7 +727,7 @@ function StakeCard({
             label={isUnlocked ? "Status" : "Unlocks in"}
             value={isUnlocked ? "Ready" : live.countdown}
             sub={isUnlocked ? "" : "remaining"}
-            color={isUnlocked ? "text-amber-400" : undefined}
+            color={isUnlocked ? "text-white" : undefined}
           />
           <DetailCell
             label="Progress"
@@ -751,8 +758,8 @@ function StakeCard({
               className={cn(
                 "h-full rounded-full",
                 live.progressPct >= 100
-                  ? "bg-green-500"
-                  : "bg-gradient-to-r from-[#C694F9] to-[#94A1F9]"
+                  ? "bg-white"
+                  : "bg-white/50"
               )}
             />
           </div>
@@ -780,10 +787,10 @@ function StakeCard({
         <button
           onClick={handleUnstake}
           disabled={unstaking}
-          className="w-full h-12 bg-gradient-to-r from-green-500 to-emerald-400 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-green-500/20"
+          className="w-full h-12 bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] hover:border-white/20 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-jakarta text-white hover:shadow-[0_0_40px_rgba(255,255,255,0.05)]"
         >
           {unstaking
-            ? <><Loader2 className="w-4 h-4 animate-spin" /> Unstaking…</>
+            ? <><Loader2 className="w-4 h-4 animate-spin text-white/50" /> Unstaking…</>
             : <>Collect Rewards</>}
         </button>
       )}
@@ -807,13 +814,13 @@ function DetailCell({
   return (
     <div className="text-center min-w-0">
       <p className={cn(
-        "font-black text-xs sm:text-sm tabular-nums break-words leading-tight",
-        color ? color : highlight ? "text-[#C694F9]" : "text-white"
+        "font-black text-xs sm:text-sm tabular-nums break-words leading-tight font-jakarta transition-colors duration-500",
+        color ? color : highlight ? "text-white" : "text-white/70"
       )}>
         {value}
       </p>
-      {sub && <p className="text-[8px] text-white/30 font-bold uppercase tracking-wider truncate">{sub}</p>}
-      <p className="text-[8px] text-white/40 font-bold uppercase tracking-wider mt-0.5 truncate">
+      {sub && <p className="text-[8px] text-white/30 font-bold uppercase tracking-wider truncate font-jakarta">{sub}</p>}
+      <p className="text-[8px] text-white/40 font-bold uppercase tracking-wider mt-0.5 truncate font-jakarta">
         {label}
       </p>
     </div>
@@ -863,24 +870,24 @@ function PoolCard({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] p-4 sm:p-5 space-y-4"
+      className="relative overflow-hidden rounded-3xl border border-white/[0.05] bg-white/[0.01] p-4 sm:p-5 space-y-4 group transition-all duration-500 hover:border-white/10 hover:bg-white/[0.02] hover:shadow-[0_0_30px_rgba(255,255,255,0.02)]"
     >
-      <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-cyan-500 to-[#C694F9] opacity-60" />
+      <div className="absolute top-0 left-0 w-full h-0.5 bg-white opacity-10 group-hover:opacity-30 transition-opacity duration-500" />
       <div className="flex items-start justify-between gap-3 min-w-0">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className={cn(
-            "w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center border shrink-0",
+            "w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center border shrink-0 transition-colors duration-500",
             isActive
-              ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400"
-              : "bg-green-500/10 border-green-500/20 text-green-400"
+              ? "bg-white/[0.03] border-white/10 text-white/70 group-hover:bg-white/10 group-hover:border-white/20 group-hover:text-white"
+              : "bg-white/[0.03] border-white/10 text-white/50 group-hover:bg-white/10 group-hover:border-white/20 group-hover:text-white"
           )}>
             {isActive ? <Droplets className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
           </div>
           <div className="min-w-0">
-            <p className="font-black text-sm sm:text-base break-words leading-tight">
+            <p className="font-black text-sm sm:text-base break-words leading-tight font-jakarta">
               {position.amount_xlm} <span className="text-white/40">XLM</span>
             </p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 truncate">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-white/40 truncate font-jakarta">
               Deposited {format(new Date(position.deposited_at), "MMM d, yyyy")}
             </p>
           </div>
@@ -890,12 +897,12 @@ function PoolCard({
             key={`${ticker}-${position.id}`}
             initial={{ opacity: 0.5 }}
             animate={{ opacity: 1 }}
-            className="font-black text-xs sm:text-sm text-[#C694F9] tabular-nums"
+            className="font-black text-xs sm:text-sm text-white tabular-nums font-jakarta transition-colors duration-500"
           >
             +{liveAccrued.toFixed(4)} EXPO
           </motion.p>
-          <p className="text-[9px] text-white/30 font-bold flex items-center justify-end gap-1">
-            {isActive && <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse inline-block" />}
+          <p className="text-[9px] text-white/30 font-bold flex items-center justify-end gap-1 font-jakarta">
+            {isActive && <span className="w-1.5 h-1.5 bg-white/60 rounded-full animate-pulse inline-block" />}
             {isActive ? "accruing" : "earned"}
           </p>
         </div>
@@ -922,10 +929,10 @@ function PoolCard({
         <button
           onClick={handleWithdraw}
           disabled={withdrawing}
-          className="w-full h-12 bg-gradient-to-r from-cyan-500 to-[#C694F9] rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20"
+          className="w-full h-12 bg-white/[0.03] border border-white/10 hover:bg-white/[0.05] hover:border-white/20 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-jakarta text-white hover:shadow-[0_0_40px_rgba(255,255,255,0.05)]"
         >
           {withdrawing
-            ? <><Loader2 className="w-4 h-4 animate-spin" /> Withdrawing…</>
+            ? <><Loader2 className="w-4 h-4 animate-spin text-white/50" /> Withdrawing…</>
             : <span className="truncate">Withdraw {position.amount_xlm} XLM + EXPO</span>}
         </button>
       )}
@@ -936,10 +943,10 @@ function PoolCard({
 function EmptyHint({ text }: { text: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 gap-4 text-center">
-      <div className="w-16 h-16 rounded-3xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
+      <div className="w-16 h-16 rounded-3xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center transition-colors duration-500 hover:bg-white/[0.05] hover:border-white/[0.1]">
         <TrendingUp className="w-7 h-7 text-white/20" />
       </div>
-      <p className="text-sm font-medium text-white/25 max-w-xs">{text}</p>
+      <p className="text-sm font-medium text-white/25 max-w-xs font-jakarta">{text}</p>
     </div>
   );
 }
