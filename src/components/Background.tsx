@@ -2,6 +2,6 @@
 
 import { BeamsBackground } from "@/components/ui/beams-background";
 
-export function Background() {
-  return <BeamsBackground intensity="strong" />;
+export function Background({ children }: { children?: React.ReactNode }) {
+  return <BeamsBackground intensity="strong">{children}</BeamsBackground>;
 }

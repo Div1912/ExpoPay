@@ -170,7 +170,7 @@ export function BeamsBackground({
     return (
         <div
             className={cn(
-                "fixed inset-0 w-full overflow-hidden bg-neutral-950 pointer-events-none -z-10",
+                "relative min-h-screen w-full overflow-hidden bg-black",
                 className
             )}
         >
@@ -194,7 +194,9 @@ export function BeamsBackground({
                     backdropFilter: "blur(10px)",
                 }}
             />
-            {children}
+            <div className="relative z-10 w-full h-full">
+                {children}
+            </div>
         </div>
     );
 }

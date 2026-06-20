@@ -57,8 +57,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <InactivityGuard>
-    <div className="min-h-screen bg-transparent text-white selection:bg-[#C694F9]/30">
-      <Background />
+      <Background>
+        <div className="min-h-screen bg-transparent text-white selection:bg-[#C694F9]/30">
       {currentUser && (
         <PaymentNotification
           currentUserId={currentUser.id}
@@ -157,8 +157,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </main>
 
-      <MobileNav navItems={navItems} sidebarItems={sidebarItems} pathname={mounted ? pathname : ''} />
-    </div>
+          <MobileNav navItems={navItems} sidebarItems={sidebarItems} pathname={mounted ? pathname : ''} />
+        </div>
+      </Background>
     </InactivityGuard>
   );
 }
