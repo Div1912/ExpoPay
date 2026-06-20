@@ -143,10 +143,21 @@ export default function QuickActions() {
                       <div
                         key={feature.title}
                         onClick={() => router.push('/auth/signup')}
-                        className="feature-card group relative p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-500 cursor-pointer overflow-hidden"
+                        className="feature-card group relative p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-white/[0.06] bg-black hover:bg-white/[0.02] hover:border-white/[0.15] transition-all duration-500 cursor-pointer overflow-hidden z-10"
                       >
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#C694F9]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#C694F9] to-[#94A1F9] opacity-0 group-hover:opacity-100 transition-opacity" />
+                      {/* Vengeance Animated Border Glow */}
+                      <motion.div
+                        className="absolute inset-[-100%] z-[-1] opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 8, ease: "linear", repeat: Infinity }}
+                        style={{
+                          background: `conic-gradient(from 90deg at 50% 50%, transparent 0%, ${feature.color}40 50%, transparent 100%)`
+                        }}
+                      />
+                      <div className="absolute inset-[1px] bg-[#050505] rounded-xl sm:rounded-2xl z-[-1]" />
+                      
+                      {/* Sweep Effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-20deg] -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-1000 ease-in-out" />
                       
                       <div className="relative flex items-center gap-4 sm:gap-5">
                         <div 

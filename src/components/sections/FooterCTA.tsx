@@ -91,9 +91,15 @@ const FooterCTA = () => {
           >
             <Link
               href="/auth/signup"
-              className="group relative flex h-12 sm:h-14 md:h-16 items-center justify-center rounded-full bg-white px-6 sm:px-8 md:px-12 transition-all duration-300 hover:shadow-[0_0_50px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98]"
+              className="group relative flex h-12 sm:h-14 md:h-16 items-center justify-center rounded-full bg-white px-6 sm:px-8 md:px-12 transition-all duration-300 hover:shadow-[0_0_50px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-[0.98] overflow-hidden"
             >
-              <span className="text-sm sm:text-base font-black text-black flex items-center gap-2 sm:gap-3 uppercase tracking-wide sm:tracking-wider">
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-black/10 to-transparent skew-x-[-20deg]"
+                initial={{ x: "-150%" }}
+                animate={{ x: "150%" }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+              />
+              <span className="text-sm sm:text-base font-black text-black flex items-center gap-2 sm:gap-3 uppercase tracking-wide sm:tracking-wider relative z-10">
                 Create Account
                 <svg 
                   width="18" 

@@ -95,7 +95,16 @@ const LargePayments = () => {
               <div className="relative w-full max-w-[380px] sm:max-w-[420px] md:max-w-[450px] mx-auto">
                 <div className="absolute -inset-4 sm:-inset-6 bg-gradient-to-br from-[#C694F9]/25 to-[#F5A7C4]/15 rounded-[40px] sm:rounded-[56px] blur-2xl sm:blur-3xl" />
                 
-                <div className="relative bg-gradient-to-br from-[#141414] to-[#0a0a0a] rounded-[28px] sm:rounded-[36px] md:rounded-[40px] p-6 sm:p-8 md:p-10 border border-white/[0.08] shadow-[0_30px_60px_rgba(0,0,0,0.5)]">
+                <div className="relative bg-gradient-to-br from-[#141414] to-[#0a0a0a] rounded-[28px] sm:rounded-[36px] md:rounded-[40px] p-6 sm:p-8 md:p-10 border border-transparent overflow-hidden shadow-[0_30px_60px_rgba(0,0,0,0.5)] z-10 group hover:border-white/10 transition-colors duration-500">
+                  {/* Vengeance Animated Border */}
+                  <motion.div
+                    className="absolute inset-[-100%] z-[-1] opacity-30 group-hover:opacity-100 transition-opacity duration-700"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 10, ease: "linear", repeat: Infinity }}
+                    style={{ background: 'conic-gradient(from 90deg at 50% 50%, transparent 0%, #C694F960 50%, transparent 100%)' }}
+                  />
+                  <div className="absolute inset-[1px] bg-[#0a0a0a] rounded-[27px] sm:rounded-[35px] md:rounded-[39px] z-[-1]" />
+                  
                   <div className="text-center space-y-6 sm:space-y-8 md:space-y-10">
                     <div>
                       <p className="text-white/50 text-xs sm:text-sm mb-2 sm:mb-3 font-medium">You're sending</p>
@@ -137,9 +146,15 @@ const LargePayments = () => {
                       </div>
                     </div>
 
-                    <button className="w-full h-12 sm:h-14 md:h-16 rounded-full bg-gradient-to-r from-[#C694F9] via-[#F5A7C4] to-[#94A1F9] text-black font-black text-xs sm:text-sm md:text-base uppercase tracking-wide sm:tracking-wider flex items-center justify-center gap-2 sm:gap-3 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_15px_30px_rgba(198,148,249,0.25)]">
+                    <button className="relative w-full h-12 sm:h-14 md:h-16 rounded-full bg-gradient-to-r from-[#C694F9] via-[#F5A7C4] to-[#94A1F9] text-black font-black text-xs sm:text-sm md:text-base uppercase tracking-wide sm:tracking-wider flex items-center justify-center gap-2 sm:gap-3 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_15px_30px_rgba(198,148,249,0.25)] overflow-hidden">
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg]"
+                        initial={{ x: "-150%" }}
+                        animate={{ x: "150%" }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+                      />
                       Confirm & Send
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 sm:w-5">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-4 sm:w-5 relative z-10">
                         <path d="M5 12h14m-7-7 7 7-7 7" />
                       </svg>
                     </button>

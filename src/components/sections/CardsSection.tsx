@@ -124,9 +124,18 @@ export default function CardsSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 md:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl border border-white/[0.08] bg-white/[0.02]"
+                className="group relative flex items-center gap-3 sm:gap-4 px-4 sm:px-5 md:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl border border-white/[0.08] bg-black overflow-hidden z-10 hover:border-transparent transition-colors duration-500"
               >
-                <div className="w-10 sm:w-11 md:w-12 aspect-square rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#C694F9]/20 to-[#94A1F9]/20 flex items-center justify-center flex-shrink-0">
+                {/* Vengeance Animated Glow */}
+                <motion.div
+                  className="absolute inset-[-100%] z-[-1] opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, ease: "linear", repeat: Infinity }}
+                  style={{ background: 'conic-gradient(from 90deg at 50% 50%, transparent 0%, #C694F940 50%, transparent 100%)' }}
+                />
+                <div className="absolute inset-[1px] bg-[#050505] rounded-[11px] sm:rounded-[15px] z-[-1]" />
+                
+                <div className="w-10 sm:w-11 md:w-12 aspect-square rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#C694F9]/20 to-[#94A1F9]/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_#C694F915]">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C694F9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 sm:w-5 md:w-6">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                   </svg>
@@ -142,9 +151,18 @@ export default function CardsSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 md:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl border border-white/[0.08] bg-white/[0.02]"
+                className="group relative flex items-center gap-3 sm:gap-4 px-4 sm:px-5 md:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl border border-white/[0.08] bg-black overflow-hidden z-10 hover:border-transparent transition-colors duration-500"
               >
-                <div className="w-10 sm:w-11 md:w-12 aspect-square rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#F5A7C4]/20 to-[#C694F9]/20 flex items-center justify-center flex-shrink-0">
+                {/* Vengeance Animated Glow */}
+                <motion.div
+                  className="absolute inset-[-100%] z-[-1] opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 8, ease: "linear", repeat: Infinity }}
+                  style={{ background: 'conic-gradient(from 90deg at 50% 50%, transparent 0%, #F5A7C440 50%, transparent 100%)' }}
+                />
+                <div className="absolute inset-[1px] bg-[#050505] rounded-[11px] sm:rounded-[15px] z-[-1]" />
+                
+                <div className="w-10 sm:w-11 md:w-12 aspect-square rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#F5A7C4]/20 to-[#C694F9]/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_#F5A7C415]">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F5A7C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 sm:w-5 md:w-6">
                     <circle cx="12" cy="12" r="10"/>
                     <polyline points="12 6 12 12 16 14"/>
