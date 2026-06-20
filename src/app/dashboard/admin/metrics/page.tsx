@@ -148,13 +148,13 @@ export default function MetricsDashboard() {
   ] : [];
 
   return (
-    <div className="space-y-7 pb-24" style={{ fontFamily: "var(--font-inter, system-ui, sans-serif)" }}>
+    <div className="space-y-7 pb-24 font-inter">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-3xl font-bold tracking-tight text-white">Analytics Dashboard</h1>
+            <h1 className="text-[clamp(2rem,8vw,3rem)] font-black tracking-tight text-white uppercase leading-[0.9]" style={{ fontFamily: 'var(--font-syne)' }}>Analytics Dashboard</h1>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/20">
               <motion.div animate={{ scale: [1, 1.4, 1] }} transition={{ repeat: Infinity, duration: 2 }}
                 className="w-1.5 h-1.5 rounded-full bg-green-500" />
@@ -320,7 +320,7 @@ export default function MetricsDashboard() {
       <div className="bg-white/[0.02] border border-white/[0.07] rounded-2xl overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 pb-4 border-b border-white/[0.05]">
           <div>
-            <h2 className="text-sm font-bold text-white">Platform Trends</h2>
+            <h2 className="text-lg font-black tracking-tight text-white uppercase" style={{ fontFamily: 'var(--font-syne)' }}>Platform Trends</h2>
             <p className="text-[11px] text-white/30 font-medium mt-0.5">Last 14 days — hover bars for details</p>
           </div>
           <div className="flex gap-1.5">
@@ -347,7 +347,7 @@ export default function MetricsDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Top Users */}
         <div className="bg-white/[0.02] border border-white/[0.07] rounded-2xl p-5">
-          <h3 className="text-sm font-bold text-white mb-4">🏆 Top Users · 30 Days</h3>
+          <h3 className="text-lg font-black text-white mb-4 tracking-tight uppercase" style={{ fontFamily: 'var(--font-syne)' }}>🏆 Top Users · 30 Days</h3>
           {topUsers.length === 0
             ? <p className="text-white/20 text-sm text-center py-6">No transaction data yet</p>
             : <div className="space-y-2">
@@ -372,7 +372,7 @@ export default function MetricsDashboard() {
 
         {/* Recent Signups */}
         <div className="bg-white/[0.02] border border-white/[0.07] rounded-2xl p-5">
-          <h3 className="text-sm font-bold text-white mb-4">✨ Recent Signups</h3>
+          <h3 className="text-lg font-black text-white mb-4 tracking-tight uppercase" style={{ fontFamily: 'var(--font-syne)' }}>✨ Recent Signups</h3>
           {signups.length === 0
             ? <p className="text-white/20 text-sm text-center py-6">No signups yet</p>
             : <div className="space-y-2">
